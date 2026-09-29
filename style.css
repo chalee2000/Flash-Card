@@ -1,0 +1,31 @@
+:root{--bg:#f3f4f8;--fg:#1f2430;--card:#fff;--accent:#4f46e5;--good:#16a34a;--bad:#dc2626}
+@media(prefers-color-scheme:dark){:root{--bg:#12141a;--fg:#e8e9ef;--card:#1e2230;--accent:#818cf8}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,"Sarabun","Noto Sans Thai",sans-serif}
+main{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:1.4rem;text-align:center}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin-bottom:12px}
+button,select,input{font:inherit;padding:8px 12px;border-radius:8px;border:1px solid #8884;background:var(--card);color:var(--fg)}
+button{cursor:pointer}
+button:hover{border-color:var(--accent)}
+.progress{height:8px;background:#8883;border-radius:4px;overflow:hidden}
+#bar{height:100%;width:0;background:var(--good);transition:width .3s}
+.status{text-align:center;font-size:.9rem;opacity:.75}
+.card{perspective:1000px;height:260px;margin:16px 0;cursor:pointer;outline:none}
+.card:focus-visible .inner{box-shadow:0 0 0 3px var(--accent)}
+.inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;border-radius:16px;box-shadow:0 6px 20px #0002}
+.card.flipped .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;background:var(--card);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;text-align:center}
+.front span{font-size:2.4rem;font-weight:700}
+.back{transform:rotateY(180deg);border:2px solid var(--accent)}
+.back span{font-size:2.2rem;font-weight:700;color:var(--accent)}
+.face small{opacity:.7;font-size:1rem}
+.icon{border:none;background:none;font-size:1.6rem;position:absolute;top:8px;right:8px}
+.hint{text-align:center;font-size:.85rem;opacity:.7}
+kbd{background:#8883;padding:1px 6px;border-radius:4px}
+.controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.good{background:var(--good);color:#fff;border-color:var(--good)}
+.bad{background:var(--bad);color:#fff;border-color:var(--bad)}
+details{margin-top:24px}
+summary{cursor:pointer}
+#addForm{display:flex;flex-direction:column;gap:8px;margin-top:8px}

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flash Card ศัพท์อังกฤษ-ไทย</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <h1>📚 Flash Card ศัพท์อังกฤษ → ไทย</h1>
+
+  <div class="toolbar">
+    <select id="category" aria-label="หมวดหมู่"></select>
+    <label><input type="checkbox" id="hideKnown"> ซ่อนคำที่จำได้แล้ว</label>
+    <button id="shuffle">🔀 สลับลำดับ</button>
+    <button id="reset">↺ รีเซ็ต</button>
+  </div>
+
+  <div class="progress"><div id="bar"></div></div>
+  <p id="status" class="status"></p>
+
+  <div id="card" class="card" tabindex="0" role="button" aria-label="พลิกการ์ด">
+    <div class="inner">
+      <div class="face front">
+        <span id="word"></span>
+        <small id="phon"></small>
+        <button id="speak" class="icon" title="ฟังเสียง" aria-label="ฟังเสียง">🔊</button>
+      </div>
+      <div class="face back">
+        <span id="meaning"></span>
+        <small id="example"></small>
+      </div>
+    </div>
+  </div>
+  <p class="hint">คลิกการ์ดหรือกด <kbd>Space</kbd> เพื่อพลิก · <kbd>←</kbd> <kbd>→</kbd> เปลี่ยนการ์ด · <kbd>K</kbd> จำได้แล้ว</p>
+
+  <div class="controls">
+    <button id="prev">← ก่อนหน้า</button>
+    <button id="unknown" class="bad">✗ ยังไม่จำ</button>
+    <button id="known" class="good">✓ จำได้แล้ว</button>
+    <button id="next">ถัดไป →</button>
+  </div>
+
+  <details>
+    <summary>➕ เพิ่มคำศัพท์ของคุณเอง</summary>
+    <form id="addForm">
+      <input id="newEn" placeholder="English" required>
+      <input id="newTh" placeholder="ภาษาไทย" required>
+      <input id="newEx" placeholder="ตัวอย่างประโยค (ไม่บังคับ)">
+      <button>เพิ่ม</button>
+    </form>
+  </details>
+</main>
+<script src="words.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
