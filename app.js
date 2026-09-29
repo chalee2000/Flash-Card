@@ -41,7 +41,12 @@ const flip = () => $("card").classList.toggle("flipped");
 const move = d => { if (!deck.length) return; idx = (idx + d + deck.length) % deck.length; render(); };
 const speak = () => {
   if (!deck.length || !("speechSynthesis" in window)) return;
-  const u = new SpeechSynthesisUtterance(deck[idx][0]); u.lang = "en-US"; speechSynthesis.cancel(); speechSynthesis.speak(u);
+  const u = new SpeechSynthesisUtterance(deck[idx][0]);
+  u.lang = "en-US"; u.rate = 0.9;
+  const voices = speechSynthesis.getVoices().filter(v => /^en[-_]US$/i.test(v.lang));
+  const v = voices.find(v => /google us|samantha|aria|jenny|zira|alex/i.test(v.name)) || voices[0];
+  if (v) u.voice = v;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
 };
 function mark(isKnown) {
   if (!deck.length) return;
