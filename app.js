@@ -33,7 +33,7 @@ function render() {
   }
   const [en, th, ex] = deck[idx];
   $("word").textContent = en; $("meaning").textContent = th; $("example").textContent = ex || "";
-  $("phon").textContent = known.has(en) ? "✓ จำได้แล้ว" : "";
+  $("phon").textContent = (IPA[en] || "") + (known.has(en) ? "  ✓ จำได้แล้ว" : "");
   $("status").textContent = `การ์ด ${idx + 1}/${deck.length} · จำได้แล้ว ${known.size}/${total} คำ`;
 }
 

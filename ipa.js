@@ -1,0 +1,25 @@
+// การออกเสียง IPA (อเมริกันอังกฤษ) ใช้ภาษาอังกฤษเป็นคีย์
+const IPA = {
+  "hello":"/həˈloʊ/","goodbye":"/ɡʊdˈbaɪ/","thank you":"/ˈθæŋk ju/","please":"/pliz/","sorry":"/ˈsɑri/","welcome":"/ˈwɛlkəm/",
+  "apple":"/ˈæpəl/","banana":"/bəˈnænə/","rice":"/raɪs/","water":"/ˈwɔtər/","bread":"/brɛd/","chicken":"/ˈtʃɪkən/","egg":"/ɛɡ/","milk":"/mɪlk/",
+  "dog":"/dɔɡ/","cat":"/kæt/","bird":"/bɜrd/","fish":"/fɪʃ/","elephant":"/ˈɛləfənt/","horse":"/hɔrs/",
+  "red":"/rɛd/","blue":"/blu/","green":"/ɡrin/","yellow":"/ˈjɛloʊ/","black":"/blæk/","white":"/waɪt/",
+  "one":"/wʌn/","two":"/tu/","three":"/θri/","ten":"/tɛn/","hundred":"/ˈhʌndrəd/",
+  "family":"/ˈfæməli/","mother":"/ˈmʌðər/","father":"/ˈfɑðər/","brother":"/ˈbrʌðər/","sister":"/ˈsɪstər/","friend":"/frɛnd/",
+  "school":"/skul/","book":"/bʊk/","house":"/haʊs/","car":"/kɑr/","time":"/taɪm/","happy":"/ˈhæpi/","beautiful":"/ˈbjutɪfəl/",
+  "difficult":"/ˈdɪfɪkəlt/","learn":"/lɜrn/","understand":"/ˌʌndərˈstænd/","travel":"/ˈtrævəl/",
+  "airport":"/ˈɛrˌpɔrt/","hotel":"/hoʊˈtɛl/","ticket":"/ˈtɪkɪt/","where":"/wɛr/","how much":"/haʊ mʌtʃ/",
+  "agenda":"/əˈdʒɛndə/","attend":"/əˈtɛnd/","schedule":"/ˈskɛdʒul/","deadline":"/ˈdɛdˌlaɪn/","postpone":"/poʊstˈpoʊn/","cancel":"/ˈkænsəl/",
+  "colleague":"/ˈkɑliɡ/","supervisor":"/ˈsupərˌvaɪzər/","employer":"/ɛmˈplɔɪər/","employee":"/ɛmˈplɔɪi/","candidate":"/ˈkændɪˌdeɪt/",
+  "resume":"/ˈrɛzəˌmeɪ/","apply for":"/əˈplaɪ fɔr/","qualification":"/ˌkwɑləfɪˈkeɪʃən/","promote":"/prəˈmoʊt/","resign":"/rɪˈzaɪn/",
+  "retire":"/rɪˈtaɪər/","salary":"/ˈsæləri/","benefit":"/ˈbɛnəfɪt/","invoice":"/ˈɪnvɔɪs/","receipt":"/rɪˈsit/","refund":"/ˈriˌfʌnd/",
+  "budget":"/ˈbʌdʒɪt/","revenue":"/ˈrɛvəˌnu/","profit":"/ˈprɑfɪt/","expense":"/ɪkˈspɛns/","estimate":"/ˈɛstəmɪt/","payment":"/ˈpeɪmənt/",
+  "purchase":"/ˈpɜrtʃəs/","order":"/ˈɔrdər/","shipment":"/ˈʃɪpmənt/","deliver":"/dɪˈlɪvər/","inventory":"/ˈɪnvənˌtɔri/","supplier":"/səˈplaɪər/",
+  "customer":"/ˈkʌstəmər/","client":"/ˈklaɪənt/","contract":"/ˈkɑnˌtrækt/","negotiate":"/nɪˈɡoʊʃiˌeɪt/","proposal":"/prəˈpoʊzəl/",
+  "approve":"/əˈpruv/","require":"/rɪˈkwaɪər/","submit":"/səbˈmɪt/","review":"/rɪˈvju/","revise":"/rɪˈvaɪz/","confirm":"/kənˈfɜrm/",
+  "reserve":"/rɪˈzɜrv/","available":"/əˈveɪləbəl/","board":"/bɔrd/","headquarters":"/ˈhɛdˌkwɔrtərz/","branch":"/bræntʃ/",
+  "department":"/dɪˈpɑrtmənt/","facility":"/fəˈsɪlɪti/","equipment":"/ɪˈkwɪpmənt/","maintenance":"/ˈmeɪntənəns/","install":"/ɪnˈstɔl/",
+  "replace":"/rɪˈpleɪs/","recommend":"/ˌrɛkəˈmɛnd/","in advance":"/ɪn ədˈvæns/","as soon as possible":"/æz sun æz ˈpɑsəbəl/",
+  "be responsible for":"/bi rɪˈspɑnsəbəl fɔr/","be located in":"/bi ˈloʊˌkeɪtɪd ɪn/","according to":"/əˈkɔrdɪŋ tu/","regarding":"/rɪˈɡɑrdɪŋ/",
+  "in charge of":"/ɪn tʃɑrdʒ əv/","boarding pass":"/ˈbɔrdɪŋ pæs/","itinerary":"/aɪˈtɪnəˌrɛri/","delay":"/dɪˈleɪ/","luggage":"/ˈlʌɡɪdʒ/"
+};
