@@ -28,10 +28,11 @@ function render() {
   const total = allWords().length;
   $("bar").style.width = (known.size / total * 100) + "%";
   if (!deck.length) {
-    $("word").textContent = "🎉 ไม่มีการ์ดเหลือ"; $("phon").textContent = ""; $("meaning").textContent = ""; $("example").textContent = "";
+    $("word").textContent = "🎉 ไม่มีการ์ดเหลือ"; $("phon").textContent = ""; $("meaning").textContent = ""; $("example").textContent = ""; $("cardTag").textContent = "";
     $("status").textContent = `จำได้แล้ว ${known.size}/${total} คำ`; return;
   }
-  const [en, th, ex] = deck[idx];
+  const [en, th, ex, cat] = deck[idx];
+  $("cardTag").textContent = cat;
   $("word").textContent = en; $("meaning").textContent = th; $("example").textContent = ex || "";
   $("phon").textContent = (IPA[en] || "") + (known.has(en) ? "  ✓ จำได้แล้ว" : "");
   $("status").textContent = `การ์ด ${idx + 1}/${deck.length} · จำได้แล้ว ${known.size}/${total} คำ`;
@@ -91,7 +92,7 @@ document.addEventListener("keydown", e => {
 // ---------- ระบบรางวัล ----------
 const KEY_REWARD = "flashcard.rewards";
 const R = Object.assign({ points: 0, quizzes: 0, correct: 0, perfect: 0, bestStreak: 0, bestPct: 0, games: 0, flawless: 0, dirs: {}, badges: [] }, load(KEY_REWARD, {}));
-const saveR = () => save(KEY_REWARD, R);
+const saveR = () => { save(KEY_REWARD, R); renderHeader(); };
 const MIN_COUNTED = 5; // ต้องทำอย่างน้อย 5 ข้อจึงนับเป็นรอบทดสอบ
 const LEVELS = [[0, "มือใหม่", "🌱"], [100, "นักเรียน", "📘"], [200, "นักอ่าน", "📖"], [300, "นักท่องศัพท์", "🧭"], [500, "นักสำรวจ", "🔍"], [700, "ผู้ชำนาญ", "🎓"], [1000, "ผู้เชี่ยวชาญ", "🏅"], [1500, "ปรมาจารย์", "👑"], [2200, "อัจฉริยะ", "🧠"], [3000, "ตำนาน", "🌟"], [5000, "เทพศัพท์", "🔱"]];
 const BADGES = [
@@ -108,6 +109,11 @@ const BADGES = [
   ["flawless", "🎴", "จับคู่ไม่พลาด", "จับคู่ครบโดยพลิกแค่ 6 ครั้ง", r => r.flawless >= 1],
   ["correct100", "💯", "ถูกสะสม 100 ข้อ", "ตอบถูกสะสมครบ 100 ข้อ", r => r.correct >= 100]
 ];
+function renderHeader() {
+  const cur = LEVELS[levelOf(R.points)];
+  $("hdrLevel").textContent = `${cur[2]} ${cur[1]}`;
+  $("hdrPoints").textContent = R.points.toLocaleString("en-US");
+}
 const levelOf = p => LEVELS.reduce((acc, l, k) => (p >= l[0] ? k : acc), 0);
 
 function unlockBadges() {
@@ -128,7 +134,7 @@ function renderRewards() {
     const on = R.badges.includes(b[0]), d = document.createElement("div");
     d.className = "badge" + (on ? " on" : "");
     const ic = document.createElement("span"), name = document.createElement("strong"), desc = document.createElement("small");
-    ic.className = "ic"; ic.textContent = on ? b[1] : "🔒";
+    ic.className = "em"; ic.textContent = on ? b[1] : "🔒";
     name.textContent = b[2]; desc.textContent = b[3];
     d.append(ic, name, desc);
     return d;
@@ -183,10 +189,13 @@ function showQuestion() {
   show("qSpeak", Q.dir === "en");
   $("opts").replaceChildren(...Q.opts.map((o, k) => {
     const b = document.createElement("button");
-    b.className = "opt"; b.textContent = `${k + 1}. ${o[a]}`; b.onclick = () => answer(k);
+    b.className = "opt"; b.onclick = () => answer(k);
+    const kk = document.createElement("span"), tx = document.createElement("span");
+    kk.className = "k"; kk.textContent = k + 1; tx.textContent = o[a];
+    b.append(kk, tx);
     return b;
   }));
-  $("qFeedback").textContent = ""; $("qFeedback").className = "feedback";
+  $("qFeedback").textContent = ""; $("qFeedback").className = "feedback"; $("qExample").textContent = "";
   show("qNext", false);
   quizProgress();
 }
@@ -209,7 +218,8 @@ function answer(k) {
     R.bestStreak = Math.max(R.bestStreak, Q.streak);
     saveR();
   } else { btns[k].classList.add("wrong"); Q.wrong.push(w); Q.streak = 0; }
-  $("qFeedback").textContent = (ok ? `✓ ถูกต้อง +${gain}` + (bonus ? ` +${bonus} 🔥 ติดกัน ${Q.streak} ข้อ` : "") : `✗ ผิด · คำตอบคือ ${w[a]}`) + (w[2] ? `\n${w[2]}` : "");
+  $("qFeedback").textContent = ok ? `✓ ถูกต้อง +${gain}` + (bonus ? ` +${bonus} 🔥 ติดกัน ${Q.streak} ข้อ` : "") : `✗ ผิด · คำตอบคือ ${w[a]}`;
+  $("qExample").textContent = w[2] || "";
   $("qFeedback").className = "feedback " + (ok ? "ok" : "no");
   $("qNext").textContent = Q.i + 1 < Q.qs.length ? "ถัดไป →" : "ดูผลคะแนน";
   show("qNext", true);
@@ -285,7 +295,7 @@ function startGame() {
   show("gameSetup", false); show("gameResult", false); show("rewardsPanel", false); show("gamePlay", true);
   $("board").replaceChildren(...G.tiles.map((t, i) => {
     const b = document.createElement("button");
-    b.className = "tile"; b.textContent = "❓"; b.setAttribute("aria-label", `การ์ดใบที่ ${i + 1}`);
+    b.className = "tile"; b.textContent = "?"; b.setAttribute("aria-label", `การ์ดใบที่ ${i + 1}`);
     b.onclick = () => flipTile(i);
     t.el = b;
     return b;
@@ -308,7 +318,7 @@ function flipTile(i) {
   } else {
     G.lock = true; gameStatus();
     setTimeout(() => {
-      for (const x of [a, b]) { x.up = false; x.el.textContent = "❓"; x.el.classList.remove("up"); }
+      for (const x of [a, b]) { x.up = false; x.el.textContent = "?"; x.el.classList.remove("up"); }
       G.lock = false;
     }, 800);
   }
@@ -333,4 +343,4 @@ $("modeGame").onclick = () => setMode("game");
 $("gameStart").onclick = startGame;
 $("gameAgain").onclick = gameSetup;
 
-buildCategories(); buildDeck();
+renderHeader(); buildCategories(); buildDeck();

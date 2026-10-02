@@ -4,62 +4,87 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Flash Card ศัพท์อังกฤษ-ไทย</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Noto+Sans:wght@400&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></symbol>
+  <symbol id="i-quiz" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></symbol>
+  <symbol id="i-game" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-sound" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></symbol>
+  <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></symbol>
+</svg>
 <main>
-  <h1>📚 Flash Card ศัพท์อังกฤษ → ไทย</h1>
+  <header class="top">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">Aa</span>
+      <div><b>Flash Card</b><small>ศัพท์อังกฤษ → ไทย</small></div>
+    </div>
+    <div class="me" aria-label="ระดับและแต้มของฉัน">
+      <span class="chip" id="hdrLevel"></span>
+      <span class="chip pts"><svg class="ic"><use href="#i-star"/></svg><span id="hdrPoints">0</span></span>
+    </div>
+  </header>
 
   <div class="tabs" role="group" aria-label="โหมด">
-    <button id="modeStudy" aria-pressed="true">📖 ท่องศัพท์</button>
-    <button id="modeQuiz" aria-pressed="false">📝 แบบทดสอบ</button>
-    <button id="modeGame" aria-pressed="false">🎮 เกมจับคู่</button>
+    <button id="modeStudy" aria-pressed="true"><svg class="ic"><use href="#i-book"/></svg>ท่องศัพท์</button>
+    <button id="modeQuiz" aria-pressed="false"><svg class="ic"><use href="#i-quiz"/></svg>แบบทดสอบ</button>
+    <button id="modeGame" aria-pressed="false"><svg class="ic"><use href="#i-game"/></svg>เกมจับคู่</button>
   </div>
 
   <div class="toolbar">
     <select id="category" aria-label="หมวดหมู่"></select>
     <div id="studyTools" class="toolrest">
-      <label><input type="checkbox" id="hideKnown"> ซ่อนคำที่จำได้แล้ว</label>
-      <button id="shuffle">🔀 สลับลำดับ</button>
-      <button id="reset">↺ รีเซ็ต</button>
+      <button id="shuffle" class="ghost"><svg class="ic"><use href="#i-shuffle"/></svg>สลับ</button>
+      <button id="reset" class="ghost">รีเซ็ต</button>
+      <label class="check"><input type="checkbox" id="hideKnown"> ซ่อนคำที่จำได้แล้ว</label>
     </div>
   </div>
 
-  <div id="study">
-  <div class="progress"><div id="bar"></div></div>
-  <p id="status" class="status"></p>
+  <div id="study" class="stack">
+    <div class="progress"><div id="bar"></div></div>
+    <p id="status" class="status"></p>
 
-  <div id="card" class="card" tabindex="0" role="button" aria-label="พลิกการ์ด">
-    <div class="inner">
-      <div class="face front">
-        <span id="word"></span>
-        <small id="phon"></small>
-        <button id="speak" class="icon" title="ฟังเสียง" aria-label="ฟังเสียง">🔊</button>
-      </div>
-      <div class="face back">
-        <span id="meaning"></span>
-        <small id="example"></small>
+    <div id="card" class="card" tabindex="0" role="button" aria-label="พลิกการ์ด">
+      <div class="inner">
+        <div class="face paper front">
+          <span id="cardTag" class="tag"></span>
+          <button id="speak" class="speak" title="ฟังเสียง" aria-label="ฟังเสียง"><svg class="ic"><use href="#i-sound"/></svg></button>
+          <span id="word" class="word"></span>
+          <small id="phon" class="phon"></small>
+        </div>
+        <div class="face paper back">
+          <span class="tag">คำแปล</span>
+          <span id="meaning" class="meaning"></span>
+          <small id="example" class="ex"></small>
+        </div>
       </div>
     </div>
-  </div>
-  <p class="hint">คลิกการ์ดหรือกด <kbd>Space</kbd> เพื่อพลิก · <kbd>←</kbd> <kbd>→</kbd> เปลี่ยนการ์ด · <kbd>K</kbd> จำได้แล้ว</p>
+    <p class="hint kbd-hint">แตะการ์ดหรือกด <kbd>Space</kbd> เพื่อพลิก · <kbd>←</kbd> <kbd>→</kbd> เปลี่ยนการ์ด · <kbd>K</kbd> จำได้แล้ว</p>
 
-  <div class="controls">
-    <button id="prev">← ก่อนหน้า</button>
-    <button id="unknown" class="bad">✗ ยังไม่จำ</button>
-    <button id="known" class="good">✓ จำได้แล้ว</button>
-    <button id="next">ถัดไป →</button>
-  </div>
+    <div class="controls study">
+      <button id="unknown" class="bad"><svg class="ic"><use href="#i-x"/></svg>ยังไม่จำ</button>
+      <button id="known" class="good"><svg class="ic"><use href="#i-check"/></svg>จำได้แล้ว</button>
+      <button id="prev" class="ghost"><svg class="ic"><use href="#i-left"/></svg>ก่อนหน้า</button>
+      <button id="next" class="ghost">ถัดไป<svg class="ic"><use href="#i-right"/></svg></button>
+    </div>
 
-  <details>
-    <summary>➕ เพิ่มคำศัพท์ของคุณเอง</summary>
-    <form id="addForm">
-      <input id="newEn" placeholder="English" required>
-      <input id="newTh" placeholder="ภาษาไทย" required>
-      <input id="newEx" placeholder="ตัวอย่างประโยค (ไม่บังคับ)">
-      <button>เพิ่ม</button>
-    </form>
-  </details>
+    <details class="add">
+      <summary><svg class="ic"><use href="#i-plus"/></svg>เพิ่มคำศัพท์ของคุณเอง</summary>
+      <form id="addForm">
+        <input id="newEn" placeholder="English" required>
+        <input id="newTh" placeholder="ภาษาไทย" required>
+        <input id="newEx" placeholder="ตัวอย่างประโยค (ไม่บังคับ)">
+        <button class="primary">เพิ่มคำ</button>
+      </form>
+    </details>
   </div>
 
   <section id="quiz" hidden>
@@ -76,22 +101,22 @@
           <option value="30">30 ข้อ</option>
         </select>
       </div>
-      <div class="controls"><button id="quizStart" class="primary">เริ่มทดสอบ</button></div>
-
+      <div class="controls"><button id="quizStart" class="primary big">เริ่มทดสอบ</button></div>
     </div>
 
     <div id="quizPlay" class="quiz-box" hidden>
       <p id="quizStatus" class="status"></p>
       <div class="progress"><div id="quizBar"></div></div>
-      <div class="q-prompt">
+      <div class="q-prompt paper">
+        <button id="qSpeak" class="speak" title="ฟังเสียง" aria-label="ฟังเสียง"><svg class="ic"><use href="#i-sound"/></svg></button>
         <span id="qWord" class="q-word"></span>
-        <small id="qPhon"></small>
-        <button id="qSpeak" class="inline-icon" title="ฟังเสียง" aria-label="ฟังเสียง">🔊</button>
+        <small id="qPhon" class="phon"></small>
       </div>
       <div id="opts" class="opts"></div>
       <p id="qFeedback" class="feedback" aria-live="polite"></p>
-      <div class="controls"><button id="qNext" class="primary" hidden>ถัดไป →</button></div>
-      <p class="hint">กด <kbd>1</kbd>–<kbd>4</kbd> เพื่อตอบ · <kbd>Enter</kbd> ข้อถัดไป</p>
+      <p id="qExample" class="q-example"></p>
+      <div class="controls"><button id="qNext" class="primary big" hidden>ถัดไป</button></div>
+      <p class="hint kbd-hint">กด <kbd>1</kbd>–<kbd>4</kbd> เพื่อตอบ · <kbd>Enter</kbd> ข้อถัดไป</p>
     </div>
 
     <div id="quizResult" class="quiz-box" hidden>
@@ -110,7 +135,7 @@
   <section id="game" hidden>
     <div id="gameSetup" class="quiz-box">
       <p id="gameInfo" class="status"></p>
-      <div class="controls"><button id="gameStart" class="primary">เริ่มเล่น</button></div>
+      <div class="controls"><button id="gameStart" class="primary big">เริ่มเล่น</button></div>
       <p class="hint">จับคู่คำอังกฤษกับคำแปลไทยให้ครบ 6 คู่ ยิ่งพลิกน้อยยิ่งได้แต้มมาก</p>
     </div>
 
@@ -127,15 +152,15 @@
     </div>
   </section>
 
-    <section id="rewardsPanel" class="rewards" aria-label="รางวัลของฉัน" hidden>
-      <div class="rw-head"><strong id="rwLevel"></strong><span id="rwPoints"></span></div>
-      <div class="progress"><div id="rwBar"></div></div>
-      <p id="rwNext" class="status"></p>
-      <p id="rwBest" class="status"></p>
-      <h2 class="rw-title">🏅 รางวัลของฉัน</h2>
-      <div id="badges" class="badges"></div>
-      <p class="hint">แบบทดสอบ: ตอบถูกข้อละ 10 แต้ม ถูกติดกัน 3 ข้อขึ้นไปได้โบนัส +5 ต่อข้อ เต็มทุกข้อ (อย่างน้อย 5 ข้อ) ได้เพิ่ม +50<br>เกมจับคู่: คู่ละ 10 แต้ม พลิกไม่เกิน 8 ครั้งได้เพิ่ม +40 ไม่เกิน 12 ครั้งได้เพิ่ม +20</p>
-    </section>
+  <section id="rewardsPanel" class="rewards" aria-label="รางวัลของฉัน" hidden>
+    <div class="rw-head"><strong id="rwLevel"></strong><span id="rwPoints"></span></div>
+    <div class="progress"><div id="rwBar"></div></div>
+    <p id="rwNext" class="status"></p>
+    <p id="rwBest" class="status"></p>
+    <h2 class="rw-title">รางวัลของฉัน</h2>
+    <div id="badges" class="badges"></div>
+    <p class="hint">แบบทดสอบ: ตอบถูกข้อละ 10 แต้ม ถูกติดกัน 3 ข้อขึ้นไปได้โบนัส +5 ต่อข้อ เต็มทุกข้อ (อย่างน้อย 5 ข้อ) ได้เพิ่ม +50<br>เกมจับคู่: คู่ละ 10 แต้ม พลิกไม่เกิน 8 ครั้งได้เพิ่ม +40 ไม่เกิน 12 ครั้งได้เพิ่ม +20</p>
+  </section>
 </main>
 <script src="words.js"></script>
 <script src="ipa.js"></script>
