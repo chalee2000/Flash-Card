@@ -10,13 +10,21 @@
 <main>
   <h1>📚 Flash Card ศัพท์อังกฤษ → ไทย</h1>
 
-  <div class="toolbar">
-    <select id="category" aria-label="หมวดหมู่"></select>
-    <label><input type="checkbox" id="hideKnown"> ซ่อนคำที่จำได้แล้ว</label>
-    <button id="shuffle">🔀 สลับลำดับ</button>
-    <button id="reset">↺ รีเซ็ต</button>
+  <div class="tabs" role="group" aria-label="โหมด">
+    <button id="modeStudy" aria-pressed="true">📖 ท่องศัพท์</button>
+    <button id="modeQuiz" aria-pressed="false">📝 แบบทดสอบ</button>
   </div>
 
+  <div class="toolbar">
+    <select id="category" aria-label="หมวดหมู่"></select>
+    <div id="studyTools" class="toolrest">
+      <label><input type="checkbox" id="hideKnown"> ซ่อนคำที่จำได้แล้ว</label>
+      <button id="shuffle">🔀 สลับลำดับ</button>
+      <button id="reset">↺ รีเซ็ต</button>
+    </div>
+  </div>
+
+  <div id="study">
   <div class="progress"><div id="bar"></div></div>
   <p id="status" class="status"></p>
 
@@ -51,6 +59,49 @@
       <button>เพิ่ม</button>
     </form>
   </details>
+  </div>
+
+  <section id="quiz" hidden>
+    <div id="quizSetup" class="quiz-box">
+      <p id="quizInfo" class="status"></p>
+      <div class="toolbar">
+        <select id="quizDir" aria-label="ทิศทางคำถาม">
+          <option value="en">อังกฤษ → ไทย</option>
+          <option value="th">ไทย → อังกฤษ</option>
+        </select>
+        <select id="quizCount" aria-label="จำนวนข้อ">
+          <option value="10">10 ข้อ</option>
+          <option value="20">20 ข้อ</option>
+          <option value="30">30 ข้อ</option>
+        </select>
+      </div>
+      <div class="controls"><button id="quizStart" class="primary">เริ่มทดสอบ</button></div>
+    </div>
+
+    <div id="quizPlay" class="quiz-box" hidden>
+      <p id="quizStatus" class="status"></p>
+      <div class="progress"><div id="quizBar"></div></div>
+      <div class="q-prompt">
+        <span id="qWord" class="q-word"></span>
+        <small id="qPhon"></small>
+        <button id="qSpeak" class="inline-icon" title="ฟังเสียง" aria-label="ฟังเสียง">🔊</button>
+      </div>
+      <div id="opts" class="opts"></div>
+      <p id="qFeedback" class="feedback" aria-live="polite"></p>
+      <div class="controls"><button id="qNext" class="primary" hidden>ถัดไป →</button></div>
+      <p class="hint">กด <kbd>1</kbd>–<kbd>4</kbd> เพื่อตอบ · <kbd>Enter</kbd> ข้อถัดไป</p>
+    </div>
+
+    <div id="quizResult" class="quiz-box" hidden>
+      <p id="resScore" class="q-word"></p>
+      <p id="resMsg" class="status"></p>
+      <ul id="resWrong" class="wrong-list"></ul>
+      <div class="controls">
+        <button id="retryWrong" hidden>ทำข้อที่ผิดซ้ำ</button>
+        <button id="quizAgain" class="primary">ทำใหม่</button>
+      </div>
+    </div>
+  </section>
 </main>
 <script src="words.js"></script>
 <script src="ipa.js"></script>
