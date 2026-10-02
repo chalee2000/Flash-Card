@@ -13,6 +13,7 @@
   <div class="tabs" role="group" aria-label="โหมด">
     <button id="modeStudy" aria-pressed="true">📖 ท่องศัพท์</button>
     <button id="modeQuiz" aria-pressed="false">📝 แบบทดสอบ</button>
+    <button id="modeGame" aria-pressed="false">🎮 เกมจับคู่</button>
   </div>
 
   <div class="toolbar">
@@ -77,15 +78,6 @@
       </div>
       <div class="controls"><button id="quizStart" class="primary">เริ่มทดสอบ</button></div>
 
-      <section class="rewards" aria-label="รางวัลของฉัน">
-        <div class="rw-head"><strong id="rwLevel"></strong><span id="rwPoints"></span></div>
-        <div class="progress"><div id="rwBar"></div></div>
-        <p id="rwNext" class="status"></p>
-        <p id="rwBest" class="status"></p>
-        <h2 class="rw-title">🏅 รางวัลของฉัน</h2>
-        <div id="badges" class="badges"></div>
-        <p class="hint">ตอบถูกข้อละ 10 แต้ม ถูกติดกัน 3 ข้อขึ้นไปได้โบนัส +5 ต่อข้อ และเต็มทุกข้อ (อย่างน้อย 5 ข้อ) ได้เพิ่ม +50</p>
-      </section>
     </div>
 
     <div id="quizPlay" class="quiz-box" hidden>
@@ -114,6 +106,36 @@
       </div>
     </div>
   </section>
+
+  <section id="game" hidden>
+    <div id="gameSetup" class="quiz-box">
+      <p id="gameInfo" class="status"></p>
+      <div class="controls"><button id="gameStart" class="primary">เริ่มเล่น</button></div>
+      <p class="hint">จับคู่คำอังกฤษกับคำแปลไทยให้ครบ 6 คู่ ยิ่งพลิกน้อยยิ่งได้แต้มมาก</p>
+    </div>
+
+    <div id="gamePlay" class="quiz-box" hidden>
+      <p id="gameStatus" class="status"></p>
+      <div id="board" class="board"></div>
+    </div>
+
+    <div id="gameResult" class="quiz-box" hidden>
+      <p id="gResScore" class="q-word"></p>
+      <p id="gResPoints" class="res-points"></p>
+      <ul id="gResBadges" class="res-badges"></ul>
+      <div class="controls"><button id="gameAgain" class="primary">เล่นอีกครั้ง</button></div>
+    </div>
+  </section>
+
+    <section id="rewardsPanel" class="rewards" aria-label="รางวัลของฉัน" hidden>
+      <div class="rw-head"><strong id="rwLevel"></strong><span id="rwPoints"></span></div>
+      <div class="progress"><div id="rwBar"></div></div>
+      <p id="rwNext" class="status"></p>
+      <p id="rwBest" class="status"></p>
+      <h2 class="rw-title">🏅 รางวัลของฉัน</h2>
+      <div id="badges" class="badges"></div>
+      <p class="hint">แบบทดสอบ: ตอบถูกข้อละ 10 แต้ม ถูกติดกัน 3 ข้อขึ้นไปได้โบนัส +5 ต่อข้อ เต็มทุกข้อ (อย่างน้อย 5 ข้อ) ได้เพิ่ม +50<br>เกมจับคู่: คู่ละ 10 แต้ม พลิกไม่เกิน 8 ครั้งได้เพิ่ม +40 ไม่เกิน 12 ครั้งได้เพิ่ม +20</p>
+    </section>
 </main>
 <script src="words.js"></script>
 <script src="ipa.js"></script>

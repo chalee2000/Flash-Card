@@ -65,7 +65,7 @@ $("prev").onclick = () => move(-1);
 $("known").onclick = () => mark(true);
 $("unknown").onclick = () => mark(false);
 $("shuffle").onclick = () => buildDeck(true);
-$("category").onchange = () => { buildDeck(); if (mode === "quiz") quizSetup(); };
+$("category").onchange = () => { buildDeck(); if (mode === "quiz") quizSetup(); else if (mode === "game") gameSetup(); };
 $("hideKnown").onchange = () => buildDeck();
 $("reset").onclick = () => { if (confirm("ล้างความคืบหน้าทั้งหมด?")) { known.clear(); save(KEY_KNOWN, []); buildDeck(); } };
 $("addForm").onsubmit = e => {
@@ -81,6 +81,7 @@ document.addEventListener("keydown", e => {
     else if ((e.key === "Enter" || e.key === " ") && Q.answered) { e.preventDefault(); nextQuestion(); }
     return;
   }
+  if (mode !== "study") return;
   if (e.key === " ") { e.preventDefault(); flip(); }
   else if (e.key === "ArrowRight") move(1);
   else if (e.key === "ArrowLeft") move(-1);
@@ -89,7 +90,7 @@ document.addEventListener("keydown", e => {
 
 // ---------- ระบบรางวัล ----------
 const KEY_REWARD = "flashcard.rewards";
-const R = Object.assign({ points: 0, quizzes: 0, correct: 0, perfect: 0, bestStreak: 0, bestPct: 0, dirs: {}, badges: [] }, load(KEY_REWARD, {}));
+const R = Object.assign({ points: 0, quizzes: 0, correct: 0, perfect: 0, bestStreak: 0, bestPct: 0, games: 0, flawless: 0, dirs: {}, badges: [] }, load(KEY_REWARD, {}));
 const saveR = () => save(KEY_REWARD, R);
 const MIN_COUNTED = 5; // ต้องทำอย่างน้อย 5 ข้อจึงนับเป็นรอบทดสอบ
 const LEVELS = [[0, "มือใหม่", "🌱"], [100, "นักเรียน", "📘"], [200, "นักอ่าน", "📖"], [300, "นักท่องศัพท์", "🧭"], [500, "นักสำรวจ", "🔍"], [700, "ผู้ชำนาญ", "🎓"], [1000, "ผู้เชี่ยวชาญ", "🏅"], [1500, "ปรมาจารย์", "👑"], [2200, "อัจฉริยะ", "🧠"], [3000, "ตำนาน", "🌟"], [5000, "เทพศัพท์", "🔱"]];
@@ -103,6 +104,8 @@ const BADGES = [
   ["pts500", "🥈", "500 แต้ม", "สะสมครบ 500 แต้ม", r => r.points >= 500],
   ["pts1000", "🥇", "1,000 แต้ม", "สะสมครบ 1,000 แต้ม", r => r.points >= 1000],
   ["quizzes10", "📚", "ขยัน", "ทำแบบทดสอบครบ 10 รอบ", r => r.quizzes >= 10],
+  ["game1", "🧩", "เล่นเกมจับคู่", "เล่นเกมจับคู่จนจบ 1 รอบ", r => r.games >= 1],
+  ["flawless", "🎴", "จับคู่ไม่พลาด", "จับคู่ครบโดยพลิกแค่ 6 ครั้ง", r => r.flawless >= 1],
   ["correct100", "💯", "ถูกสะสม 100 ข้อ", "ตอบถูกสะสมครบ 100 ข้อ", r => r.correct >= 100]
 ];
 const levelOf = p => LEVELS.reduce((acc, l, k) => (p >= l[0] ? k : acc), 0);
@@ -141,10 +144,14 @@ const show = (id, on) => { $(id).hidden = !on; };
 
 function setMode(m) {
   mode = m;
-  show("study", m === "study"); show("studyTools", m === "study"); show("quiz", m === "quiz");
+  clearInterval(G.timer);
+  show("study", m === "study"); show("studyTools", m === "study"); show("quiz", m === "quiz"); show("game", m === "game");
+  show("rewardsPanel", false);
   $("modeStudy").setAttribute("aria-pressed", m === "study");
   $("modeQuiz").setAttribute("aria-pressed", m === "quiz");
+  $("modeGame").setAttribute("aria-pressed", m === "game");
   if (m === "quiz") quizSetup();
+  if (m === "game") gameSetup();
 }
 
 function quizSetup() {
@@ -152,13 +159,13 @@ function quizSetup() {
   const n = catPool().length;
   $("quizInfo").textContent = n ? `หมวดนี้มี ${n} คำ เลือกหมวดจากเมนูด้านบน` : "หมวดนี้ยังไม่มีคำ";
   $("quizStart").disabled = !n;
-  renderRewards();
+  show("rewardsPanel", true); renderRewards();
 }
 
 function startQuiz(words, retry = false) {
   Q.dir = $("quizDir").value; Q.qs = words; Q.i = 0; Q.score = 0; Q.wrong = [];
   Q.pts = 0; Q.streak = 0; Q.retry = retry; Q.lvl0 = levelOf(R.points);
-  show("quizSetup", false); show("quizResult", false); show("quizPlay", true);
+  show("quizSetup", false); show("quizResult", false); show("rewardsPanel", false); show("quizPlay", true);
   showQuestion();
 }
 
@@ -243,5 +250,87 @@ $("quizAgain").onclick = quizSetup;
 $("retryWrong").onclick = () => startQuiz(shuffled(Q.wrong), true);
 $("qNext").onclick = nextQuestion;
 $("qSpeak").onclick = () => speakText(Q.cur[0]);
+
+// ---------- เกมจับคู่ ----------
+const G = { tiles: [], first: null, lock: false, moves: 0, found: 0, t0: 0, pts: 0, lvl0: 0, timer: null };
+const pickPairs = () => {
+  const out = [], seen = new Set();
+  for (const w of shuffled(catPool())) {
+    if (!seen.has(w[1])) { seen.add(w[1]); out.push(w); }
+    if (out.length === 6) break;
+  }
+  return out;
+};
+const fmtTime = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+
+function gameSetup() {
+  clearInterval(G.timer);
+  show("gameSetup", true); show("gamePlay", false); show("gameResult", false);
+  const ok = pickPairs().length === 6;
+  $("gameInfo").textContent = ok ? "เลือกหมวดจากเมนูด้านบน แล้วกดเริ่มเล่น" : "หมวดนี้มีคำไม่พอ ต้องมีอย่างน้อย 6 คำที่ความหมายไม่ซ้ำกัน";
+  $("gameStart").disabled = !ok;
+  show("rewardsPanel", true); renderRewards();
+}
+
+function gameStatus() {
+  const s = Math.floor((Date.now() - G.t0) / 1000);
+  $("gameStatus").textContent = `พลิก ${G.moves} ครั้ง · พบ ${G.found}/6 คู่ · ⏱ ${fmtTime(s)}`;
+}
+
+function startGame() {
+  const pairs = pickPairs();
+  if (pairs.length < 6) return;
+  Object.assign(G, { first: null, lock: false, moves: 0, found: 0, pts: 0, lvl0: levelOf(R.points), t0: Date.now() });
+  G.tiles = shuffled(pairs.flatMap(w => [{ key: w[0], text: w[0], en: true }, { key: w[0], text: w[1], en: false }]));
+  show("gameSetup", false); show("gameResult", false); show("rewardsPanel", false); show("gamePlay", true);
+  $("board").replaceChildren(...G.tiles.map((t, i) => {
+    const b = document.createElement("button");
+    b.className = "tile"; b.textContent = "❓"; b.setAttribute("aria-label", `การ์ดใบที่ ${i + 1}`);
+    b.onclick = () => flipTile(i);
+    t.el = b;
+    return b;
+  }));
+  clearInterval(G.timer); G.timer = setInterval(gameStatus, 1000); gameStatus();
+}
+
+function flipTile(i) {
+  const t = G.tiles[i];
+  if (G.lock || t.up || t.done) return;
+  t.up = true; t.el.textContent = t.text; t.el.classList.add("up");
+  if (t.en) speakText(t.text);
+  if (G.first === null) { G.first = i; return; }
+  const a = G.tiles[G.first], b = t;
+  G.first = null; G.moves++;
+  if (a.key === b.key) {
+    a.done = b.done = true; a.el.classList.add("done"); b.el.classList.add("done");
+    G.found++; G.pts += 10; R.points += 10; saveR(); gameStatus();
+    if (G.found === 6) { G.lock = true; clearInterval(G.timer); setTimeout(finishGame, 600); }
+  } else {
+    G.lock = true; gameStatus();
+    setTimeout(() => {
+      for (const x of [a, b]) { x.up = false; x.el.textContent = "❓"; x.el.classList.remove("up"); }
+      G.lock = false;
+    }, 800);
+  }
+}
+
+function finishGame() {
+  const secs = Math.floor((Date.now() - G.t0) / 1000);
+  const bonus = G.moves <= 8 ? 40 : G.moves <= 12 ? 20 : 0;
+  R.points += bonus; G.pts += bonus; R.games++;
+  if (G.moves === 6) R.flawless++;
+  saveR();
+  const lines = unlockBadges().map(b => `🎉 ปลดล็อก ${b[1]} ${b[2]}`);
+  const lv = levelOf(R.points);
+  if (lv > G.lvl0) lines.unshift(`⬆️ เลื่อนระดับเป็น ${LEVELS[lv][2]} ${LEVELS[lv][1]}`);
+  $("gResScore").textContent = `พลิก ${G.moves} ครั้ง · ${fmtTime(secs)}`;
+  $("gResPoints").textContent = `ได้ +${G.pts} แต้ม` + (bonus ? ` (รวมโบนัสพลิกน้อย +${bonus})` : "");
+  $("gResBadges").replaceChildren(...lines.map(t => { const li = document.createElement("li"); li.textContent = t; return li; }));
+  show("gamePlay", false); show("gameResult", true);
+}
+
+$("modeGame").onclick = () => setMode("game");
+$("gameStart").onclick = startGame;
+$("gameAgain").onclick = gameSetup;
 
 buildCategories(); buildDeck();
