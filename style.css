@@ -50,3 +50,16 @@ summary{cursor:pointer}
 .feedback.no{color:var(--bad)}
 .primary{background:var(--accent);color:var(--accent-fg,#fff);border-color:var(--accent)}
 .wrong-list{margin:0;padding-left:1.3rem;display:flex;flex-direction:column;gap:4px}
+
+.rewards{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.rw-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.rw-head strong{font-size:1.2rem}
+#rwBar{height:100%;width:0;background:var(--accent);transition:width .3s}
+.rw-title{font-size:1rem;margin:10px 0 0}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.badge{display:flex;flex-direction:column;gap:2px;padding:10px;border:1px solid var(--line,#8884);border-radius:10px;background:var(--card);opacity:.55;min-width:0;overflow-wrap:anywhere}
+.badge.on{opacity:1;border-color:var(--good)}
+.badge .ic{font-size:1.5rem}
+.badge small{color:var(--muted,#888)}
+.res-points{text-align:center;font-weight:700;color:var(--accent);margin:0;white-space:pre-line}
+.res-badges{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px;text-align:center}

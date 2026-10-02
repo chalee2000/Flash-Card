@@ -76,6 +76,16 @@
         </select>
       </div>
       <div class="controls"><button id="quizStart" class="primary">เริ่มทดสอบ</button></div>
+
+      <section class="rewards" aria-label="รางวัลของฉัน">
+        <div class="rw-head"><strong id="rwLevel"></strong><span id="rwPoints"></span></div>
+        <div class="progress"><div id="rwBar"></div></div>
+        <p id="rwNext" class="status"></p>
+        <p id="rwBest" class="status"></p>
+        <h2 class="rw-title">🏅 รางวัลของฉัน</h2>
+        <div id="badges" class="badges"></div>
+        <p class="hint">ตอบถูกข้อละ 10 แต้ม ถูกติดกัน 3 ข้อขึ้นไปได้โบนัส +5 ต่อข้อ และเต็มทุกข้อ (อย่างน้อย 5 ข้อ) ได้เพิ่ม +50</p>
+      </section>
     </div>
 
     <div id="quizPlay" class="quiz-box" hidden>
@@ -95,6 +105,8 @@
     <div id="quizResult" class="quiz-box" hidden>
       <p id="resScore" class="q-word"></p>
       <p id="resMsg" class="status"></p>
+      <p id="resPoints" class="res-points"></p>
+      <ul id="resBadges" class="res-badges"></ul>
       <ul id="resWrong" class="wrong-list"></ul>
       <div class="controls">
         <button id="retryWrong" hidden>ทำข้อที่ผิดซ้ำ</button>
