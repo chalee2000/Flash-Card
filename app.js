@@ -92,7 +92,7 @@ const KEY_REWARD = "flashcard.rewards";
 const R = Object.assign({ points: 0, quizzes: 0, correct: 0, perfect: 0, bestStreak: 0, bestPct: 0, dirs: {}, badges: [] }, load(KEY_REWARD, {}));
 const saveR = () => save(KEY_REWARD, R);
 const MIN_COUNTED = 5; // ต้องทำอย่างน้อย 5 ข้อจึงนับเป็นรอบทดสอบ
-const LEVELS = [[0, "มือใหม่", "🌱"], [100, "นักเรียน", "📘"], [300, "นักท่องศัพท์", "🧭"], [700, "ผู้ชำนาญ", "🎓"], [1500, "ปรมาจารย์", "👑"], [3000, "ตำนาน", "🌟"]];
+const LEVELS = [[0, "มือใหม่", "🌱"], [100, "นักเรียน", "📘"], [200, "นักอ่าน", "📖"], [300, "นักท่องศัพท์", "🧭"], [500, "นักสำรวจ", "🔍"], [700, "ผู้ชำนาญ", "🎓"], [1000, "ผู้เชี่ยวชาญ", "🏅"], [1500, "ปรมาจารย์", "👑"], [2200, "อัจฉริยะ", "🧠"], [3000, "ตำนาน", "🌟"], [5000, "เทพศัพท์", "🔱"]];
 const BADGES = [
   ["first", "🎯", "ทดสอบครั้งแรก", "ทำแบบทดสอบจนจบ 1 รอบ", r => r.quizzes >= 1],
   ["perfect", "🏆", "เต็มทุกข้อ", "ตอบถูกทุกข้อในรอบเดียว", r => r.perfect >= 1],
@@ -134,7 +134,7 @@ function renderRewards() {
 
 // ---------- แบบทดสอบ ----------
 let mode = "study";
-const Q = { dir: "en", qs: [], i: 0, score: 0, wrong: [], answered: false, opts: [], cur: null, pts: 0, streak: 0, retry: false };
+const Q = { dir: "en", qs: [], i: 0, score: 0, wrong: [], answered: false, opts: [], cur: null, pts: 0, streak: 0, retry: false, lvl0: 0 };
 const shuffled = a => { const r = a.slice(); for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; };
 const catPool = () => { const cat = $("category").value; return allWords().filter(w => cat === "ทั้งหมด" || w[3] === cat); };
 const show = (id, on) => { $(id).hidden = !on; };
@@ -157,7 +157,7 @@ function quizSetup() {
 
 function startQuiz(words, retry = false) {
   Q.dir = $("quizDir").value; Q.qs = words; Q.i = 0; Q.score = 0; Q.wrong = [];
-  Q.pts = 0; Q.streak = 0; Q.retry = retry;
+  Q.pts = 0; Q.streak = 0; Q.retry = retry; Q.lvl0 = levelOf(R.points);
   show("quizSetup", false); show("quizResult", false); show("quizPlay", true);
   showQuestion();
 }
@@ -228,7 +228,10 @@ function showResult() {
   }
   const fresh = unlockBadges();
   $("resPoints").textContent = `ได้ +${Q.pts} แต้ม` + (perfect ? " (รวมโบนัสเต็มทุกข้อ +50)" : "") + (counted ? "" : `\n(รอบนี้ไม่นับสถิติ ต้องทำใหม่อย่างน้อย ${MIN_COUNTED} ข้อ ไม่ใช่รอบทำซ้ำข้อที่ผิด)`);
-  $("resBadges").replaceChildren(...fresh.map(b => { const li = document.createElement("li"); li.textContent = `🎉 ปลดล็อก ${b[1]} ${b[2]}`; return li; }));
+  const lines = fresh.map(b => `🎉 ปลดล็อก ${b[1]} ${b[2]}`);
+  const lv = levelOf(R.points);
+  if (lv > Q.lvl0) lines.unshift(`⬆️ เลื่อนระดับเป็น ${LEVELS[lv][2]} ${LEVELS[lv][1]}`);
+  $("resBadges").replaceChildren(...lines.map(t => { const li = document.createElement("li"); li.textContent = t; return li; }));
   $("resWrong").replaceChildren(...Q.wrong.map(w => { const li = document.createElement("li"); li.textContent = `${w[0]} — ${w[1]}`; return li; }));
   show("retryWrong", Q.wrong.length > 0);
 }
