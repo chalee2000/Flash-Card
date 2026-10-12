@@ -65,10 +65,10 @@ select,input:not([type="checkbox"]){padding:10px 12px;border-radius:12px;border:
 input[type="checkbox"]{accent-color:var(--accent);width:18px;height:18px;margin:0}
 
 /* mode tabs */
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;background:var(--bg2);border-radius:16px}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:4px;background:var(--bg2);border-radius:16px}
 .tabs button{flex-direction:column;gap:3px;padding:8px 4px;border:none;border-radius:12px;background:transparent;color:var(--muted);font-size:.85rem;white-space:nowrap}
 .tabs button[aria-pressed="true"]{background:var(--mark);color:var(--mark-fg);box-shadow:0 2px 0 rgba(0,0,0,.18)}
-@media (min-width:460px){.tabs button{flex-direction:row;gap:8px;font-size:.95rem;padding:10px 8px}}
+@media (min-width:460px){.tabs button{flex-direction:row;gap:6px;font-size:.9rem;padding:10px 6px}}
 
 /* progress */
 .progress{height:10px;background:var(--bg2);border-radius:99px;overflow:hidden}
@@ -102,9 +102,6 @@ kbd{background:var(--bg2);padding:1px 6px;border-radius:5px;font-family:inherit;
 .ex:empty{display:none}
 
 /* add word */
-.add{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
-.add summary{cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600}
-#addForm{display:flex;flex-direction:column;gap:8px;margin-top:12px}
 
 /* quiz */
 .q-prompt{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:62px 16px 22px;border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 28px var(--shadow);text-align:center;overflow-wrap:anywhere}
@@ -145,5 +142,24 @@ kbd{background:var(--bg2);padding:1px 6px;border-radius:5px;font-family:inherit;
 .tile{min-height:88px;min-width:0;padding:8px;font-size:.95rem;font-weight:600;text-align:center;overflow-wrap:anywhere;border-radius:14px;border:2px solid var(--back);background-color:var(--back);background-image:repeating-linear-gradient(135deg,transparent 0 7px,rgba(255,255,255,.1) 7px 9px);color:var(--mark);font-family:var(--font-word);font-size:1.8rem}
 .tile.up{background-image:none;background-color:var(--card);border-color:var(--accent);color:var(--fg);font-family:var(--font-ui);font-size:.95rem}
 .tile.done{background-image:none;background-color:var(--good-bg);border-color:var(--good);color:var(--good);font-family:var(--font-ui);font-size:.95rem;cursor:default}
+
+/* add words */
+#manage{display:flex;flex-direction:column;gap:14px}
+.manage-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.manage-card .rw-title{margin:0}
+.fld{display:flex;flex-direction:column;gap:4px;font-size:.85rem;font-weight:600;color:var(--muted)}
+.fld em{font-weight:400;font-style:normal}
+.fld input{font-size:1rem;font-weight:400}
+.bulk{display:block}
+.bulk summary{cursor:pointer;font-weight:600}
+.bulk .stack{margin-top:10px}
+#bulkText{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg);font:inherit;resize:vertical}
+.custom-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.cw{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--line);border-radius:12px}
+.cw-info{display:flex;flex-direction:column;min-width:0;overflow-wrap:anywhere}
+.cw-info small{color:var(--muted);font-family:var(--font-ipa)}
+.cw-act{display:flex;gap:6px;flex:none}
+.small{padding:6px 10px;font-size:.85rem;border-radius:10px}
+.custom-list .empty{color:var(--muted);text-align:center;padding:10px}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}

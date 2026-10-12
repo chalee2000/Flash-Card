@@ -37,9 +37,10 @@
     <button id="modeStudy" aria-pressed="true"><svg class="ic"><use href="#i-book"/></svg>ท่องศัพท์</button>
     <button id="modeQuiz" aria-pressed="false"><svg class="ic"><use href="#i-quiz"/></svg>แบบทดสอบ</button>
     <button id="modeGame" aria-pressed="false"><svg class="ic"><use href="#i-game"/></svg>เกมจับคู่</button>
+    <button id="modeManage" aria-pressed="false"><svg class="ic"><use href="#i-plus"/></svg>เพิ่มคำ</button>
   </div>
 
-  <div class="toolbar">
+  <div id="mainToolbar" class="toolbar">
     <select id="category" aria-label="หมวดหมู่"></select>
     <div id="studyTools" class="toolrest">
       <button id="shuffle" class="ghost"><svg class="ic"><use href="#i-shuffle"/></svg>สลับ</button>
@@ -76,15 +77,6 @@
       <button id="next" class="ghost">ถัดไป<svg class="ic"><use href="#i-right"/></svg></button>
     </div>
 
-    <details class="add">
-      <summary><svg class="ic"><use href="#i-plus"/></svg>เพิ่มคำศัพท์ของคุณเอง</summary>
-      <form id="addForm">
-        <input id="newEn" placeholder="English" required>
-        <input id="newTh" placeholder="ภาษาไทย" required>
-        <input id="newEx" placeholder="ตัวอย่างประโยค (ไม่บังคับ)">
-        <button class="primary">เพิ่มคำ</button>
-      </form>
-    </details>
   </div>
 
   <section id="quiz" hidden>
@@ -149,6 +141,38 @@
       <p id="gResPoints" class="res-points"></p>
       <ul id="gResBadges" class="res-badges"></ul>
       <div class="controls"><button id="gameAgain" class="primary">เล่นอีกครั้ง</button></div>
+    </div>
+  </section>
+
+  <section id="manage" hidden>
+    <form id="wordForm" class="manage-card">
+      <h2 id="formTitle" class="rw-title">เพิ่มคำใหม่</h2>
+      <label class="fld"><span>English</span><input id="newEn" required autocomplete="off" autocapitalize="none" spellcheck="false"></label>
+      <label class="fld"><span>ภาษาไทย</span><input id="newTh" required autocomplete="off"></label>
+      <label class="fld"><span>ตัวอย่างประโยค <em>(ไม่บังคับ)</em></span><input id="newEx" autocomplete="off"></label>
+      <label class="fld"><span>IPA <em>(ไม่บังคับ)</em></span><input id="newIpa" placeholder="/həˈloʊ/" autocomplete="off"></label>
+      <label class="fld"><span>หมวดหมู่ <em>(เว้นว่างไว้ = คำของฉัน)</em></span><input id="newCat" list="catList" placeholder="คำของฉัน" autocomplete="off"></label>
+      <datalist id="catList"></datalist>
+      <div class="controls">
+        <button id="saveWord" class="primary">เพิ่มคำ</button>
+        <button type="button" id="cancelEdit" class="ghost" hidden>ยกเลิก</button>
+      </div>
+    </form>
+
+    <details class="manage-card bulk">
+      <summary>วางหลายคำพร้อมกัน</summary>
+      <div class="stack">
+        <p class="hint">หนึ่งคำต่อบรรทัด รูปแบบ <b>english = ไทย</b> หรือ <b>english = ไทย = ตัวอย่างประโยค</b> ใช้หมวดหมู่จากช่องด้านบน</p>
+        <textarea id="bulkText" rows="6" placeholder="apple = แอปเปิล&#10;ticket = ตั๋ว = I need a ticket." spellcheck="false"></textarea>
+        <button type="button" id="bulkAdd" class="primary">เพิ่มทั้งหมด</button>
+      </div>
+    </details>
+
+    <p id="manageMsg" class="feedback" aria-live="polite"></p>
+
+    <div class="manage-card">
+      <div class="rw-head"><strong>คำของฉัน</strong><span id="customCount" class="status"></span></div>
+      <ul id="customList" class="custom-list"></ul>
     </div>
   </section>
 

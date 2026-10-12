@@ -1,13 +1,14 @@
 const KEY_KNOWN = "flashcard.known", KEY_CUSTOM = "flashcard.custom";
 const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
 const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+const DEFAULT_CAT = "คำของฉัน";
 
 let custom = load(KEY_CUSTOM, []);
 let known = new Set(load(KEY_KNOWN, []));
 let deck = [], idx = 0;
 
 const $ = id => document.getElementById(id);
-const allWords = () => WORDS.concat(custom.map(c => [c[0], c[1], c[2], "คำของฉัน"]));
+const allWords = () => WORDS.concat(custom.map(c => [c[0], c[1], c[2], c[3] || DEFAULT_CAT]));
 
 function buildCategories() {
   const cur = $("category").value || "ทั้งหมด";
@@ -34,7 +35,7 @@ function render() {
   const [en, th, ex, cat] = deck[idx];
   $("cardTag").textContent = cat;
   $("word").textContent = en; $("meaning").textContent = th; $("example").textContent = ex || "";
-  $("phon").textContent = (IPA[en] || "") + (known.has(en) ? "  ✓ จำได้แล้ว" : "");
+  $("phon").textContent = ipaOf(en) + (known.has(en) ? "  ✓ จำได้แล้ว" : "");
   $("status").textContent = `การ์ด ${idx + 1}/${deck.length} · จำได้แล้ว ${known.size}/${total} คำ`;
 }
 
@@ -69,11 +70,6 @@ $("shuffle").onclick = () => buildDeck(true);
 $("category").onchange = () => { buildDeck(); if (mode === "quiz") quizSetup(); else if (mode === "game") gameSetup(); };
 $("hideKnown").onchange = () => buildDeck();
 $("reset").onclick = () => { if (confirm("ล้างความคืบหน้าทั้งหมด?")) { known.clear(); save(KEY_KNOWN, []); buildDeck(); } };
-$("addForm").onsubmit = e => {
-  e.preventDefault();
-  custom.push([$("newEn").value.trim(), $("newTh").value.trim(), $("newEx").value.trim()]);
-  save(KEY_CUSTOM, custom); e.target.reset(); buildCategories(); buildDeck();
-};
 document.addEventListener("keydown", e => {
   if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
   if (mode === "quiz") {
@@ -151,13 +147,15 @@ const show = (id, on) => { $(id).hidden = !on; };
 function setMode(m) {
   mode = m;
   clearInterval(G.timer);
-  show("study", m === "study"); show("studyTools", m === "study"); show("quiz", m === "quiz"); show("game", m === "game");
+  show("study", m === "study"); show("studyTools", m === "study"); show("quiz", m === "quiz"); show("game", m === "game"); show("manage", m === "manage"); show("mainToolbar", m !== "manage");
   show("rewardsPanel", false);
   $("modeStudy").setAttribute("aria-pressed", m === "study");
   $("modeQuiz").setAttribute("aria-pressed", m === "quiz");
   $("modeGame").setAttribute("aria-pressed", m === "game");
+  $("modeManage").setAttribute("aria-pressed", m === "manage");
   if (m === "quiz") quizSetup();
   if (m === "game") gameSetup();
+  if (m === "manage") { msg(""); renderCustomList(); renderCatList(); }
 }
 
 function quizSetup() {
@@ -185,7 +183,7 @@ function showQuestion() {
   }
   Q.opts = shuffled(opts); Q.answered = false; Q.cur = w;
   $("qWord").textContent = w[p];
-  $("qPhon").textContent = Q.dir === "en" ? (IPA[w[0]] || "") : "";
+  $("qPhon").textContent = Q.dir === "en" ? ipaOf(w[0]) : "";
   show("qSpeak", Q.dir === "en");
   $("opts").replaceChildren(...Q.opts.map((o, k) => {
     const b = document.createElement("button");
@@ -342,5 +340,119 @@ function finishGame() {
 $("modeGame").onclick = () => setMode("game");
 $("gameStart").onclick = startGame;
 $("gameAgain").onclick = gameSetup;
+
+// ---------- เพิ่มคำของฉัน ----------
+let editing = -1, delArmed = -1, delTimer = null;
+const saveCustom = () => save(KEY_CUSTOM, custom);
+const norm = s => s.trim().toLowerCase();
+const exists = (en, skip = -1) => WORDS.some(w => norm(w[0]) === norm(en)) || custom.some((c, i) => i !== skip && norm(c[0]) === norm(en));
+const ipaOf = en => { const c = custom.find(c => c[0] === en); return (c && c[4]) || IPA[en] || ""; };
+const msg = (text, ok = true) => { $("manageMsg").textContent = text; $("manageMsg").className = "feedback " + (ok ? "ok" : "no"); };
+const RESERVED = "ทั้งหมด";
+
+function refreshAfterChange() {
+  saveCustom(); buildCategories(); buildDeck(); renderCustomList(); renderCatList();
+}
+
+function renderCatList() {
+  $("catList").replaceChildren(...[...new Set(allWords().map(w => w[3]))].map(c => { const o = document.createElement("option"); o.value = c; return o; }));
+}
+
+function renderCustomList() {
+  $("customCount").textContent = custom.length ? `${custom.length} คำ` : "";
+  if (!custom.length) {
+    const li = document.createElement("li");
+    li.className = "empty"; li.textContent = "ยังไม่มีคำของคุณ กรอกฟอร์มด้านบนเพื่อเพิ่มคำแรก";
+    $("customList").replaceChildren(li);
+    return;
+  }
+  const btn = (text, cls, fn) => { const b = document.createElement("button"); b.type = "button"; b.className = cls; b.textContent = text; b.onclick = fn; return b; };
+  $("customList").replaceChildren(...custom.map((c, i) => i).reverse().map(i => {
+    const c = custom[i], li = document.createElement("li"), info = document.createElement("div"), act = document.createElement("div");
+    li.className = "cw"; info.className = "cw-info"; act.className = "cw-act";
+    const en = document.createElement("strong"), th = document.createElement("span"), meta = document.createElement("small");
+    en.textContent = c[0]; th.textContent = c[1]; meta.textContent = [c[3] || DEFAULT_CAT, c[4]].filter(Boolean).join(" · ");
+    info.append(en, th, meta);
+    act.append(btn("แก้ไข", "ghost small", () => startEdit(i)), btn(delArmed === i ? "กดอีกครั้ง" : "ลบ", "small " + (delArmed === i ? "bad" : "ghost"), () => deleteWord(i)));
+    li.append(info, act);
+    return li;
+  }));
+}
+
+function resetForm() {
+  editing = -1; $("wordForm").reset();
+  $("formTitle").textContent = "เพิ่มคำใหม่"; $("saveWord").textContent = "เพิ่มคำ"; show("cancelEdit", false);
+}
+
+function startEdit(i) {
+  const c = custom[i];
+  editing = i;
+  $("newEn").value = c[0]; $("newTh").value = c[1]; $("newEx").value = c[2] || ""; $("newIpa").value = c[4] || ""; $("newCat").value = c[3] && c[3] !== DEFAULT_CAT ? c[3] : "";
+  $("formTitle").textContent = "แก้ไขคำ"; $("saveWord").textContent = "บันทึกการแก้ไข"; show("cancelEdit", true);
+  msg("");
+  try { $("wordForm").scrollIntoView({ behavior: "smooth", block: "start" }); } catch {}
+  $("newEn").focus();
+}
+
+function deleteWord(i) {
+  if (delArmed !== i) {
+    delArmed = i; clearTimeout(delTimer);
+    delTimer = setTimeout(() => { delArmed = -1; renderCustomList(); }, 3000);
+    renderCustomList();
+    return;
+  }
+  clearTimeout(delTimer); delArmed = -1;
+  const en = custom.splice(i, 1)[0][0];
+  known.delete(en); save(KEY_KNOWN, [...known]);
+  if (editing === i) resetForm(); else if (editing > i) editing--;
+  msg(`ลบ "${en}" แล้ว`);
+  refreshAfterChange();
+}
+
+$("wordForm").onsubmit = e => {
+  e.preventDefault();
+  const en = $("newEn").value.trim(), th = $("newTh").value.trim(), ex = $("newEx").value.trim();
+  const ipa = $("newIpa").value.trim(), cat = $("newCat").value.trim() || DEFAULT_CAT;
+  if (!en || !th) return msg("กรอกคำอังกฤษและคำแปลไทยให้ครบ", false);
+  if (cat === RESERVED) return msg(`ชื่อหมวด "${RESERVED}" ใช้ไม่ได้ กรุณาตั้งชื่ออื่น`, false);
+  if (exists(en, editing)) return msg(`มีคำว่า "${en}" อยู่แล้ว`, false);
+  if (editing >= 0) {
+    const old = custom[editing][0];
+    custom[editing] = [en, th, ex, cat, ipa];
+    if (old !== en && known.has(old)) { known.delete(old); known.add(en); save(KEY_KNOWN, [...known]); }
+    msg(`แก้ไข "${en}" แล้ว`);
+    resetForm();
+  } else {
+    custom.push([en, th, ex, cat, ipa]);
+    msg(`เพิ่ม "${en}" แล้ว`);
+    resetForm();
+    $("newCat").value = cat === DEFAULT_CAT ? "" : cat; // เก็บหมวดไว้เพิ่มคำต่อเนื่อง
+  }
+  refreshAfterChange();
+  $("newEn").focus();
+};
+
+$("cancelEdit").onclick = () => { resetForm(); msg(""); };
+
+$("bulkAdd").onclick = () => {
+  const cat = $("newCat").value.trim() || DEFAULT_CAT;
+  if (cat === RESERVED) return msg(`ชื่อหมวด "${RESERVED}" ใช้ไม่ได้ กรุณาตั้งชื่ออื่น`, false);
+  let added = 0;
+  const skipped = [];
+  for (const raw of $("bulkText").value.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line) continue;
+    const parts = line.split("=").map(s => s.trim());
+    const en = parts[0], th = parts[1] || "", ex = parts.slice(2).join("=").trim();
+    if (!en || !th) { skipped.push(`"${line}" (รูปแบบไม่ถูกต้อง)`); continue; }
+    if (exists(en)) { skipped.push(`"${en}" (มีอยู่แล้ว)`); continue; }
+    custom.push([en, th, ex, cat, ""]); added++;
+  }
+  if (!added && !skipped.length) return msg("ยังไม่ได้วางรายการคำ", false);
+  msg(`เพิ่ม ${added} คำ` + (skipped.length ? ` · ข้าม ${skipped.length} บรรทัด: ${skipped.slice(0, 3).join(", ")}${skipped.length > 3 ? " ..." : ""}` : ""), added > 0);
+  if (added && !skipped.length) $("bulkText").value = "";
+  if (added) refreshAfterChange();
+};
+$("modeManage").onclick = () => setMode("manage");
 
 renderHeader(); buildCategories(); buildDeck();
