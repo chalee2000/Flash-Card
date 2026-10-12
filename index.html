@@ -152,6 +152,7 @@
       <label class="fld"><span>ภาษาไทย</span><input id="newTh" required autocomplete="off"></label>
       <label class="fld"><span>ตัวอย่างประโยค <em>(ไม่บังคับ)</em></span><input id="newEx" autocomplete="off"></label>
       <label class="fld"><span>IPA <em>(ไม่บังคับ)</em></span><input id="newIpa" placeholder="/həˈloʊ/" autocomplete="off"></label>
+      <label class="fld"><span>คำอ่านไทย <em>(ไม่บังคับ)</em></span><input id="newRead" placeholder="สเตรชท์" autocomplete="off"></label>
       <label class="fld"><span>รูปภาพ <em>(ไม่บังคับ)</em></span><input id="newImg" type="file" accept="image/*"></label>
       <div id="imgPreview" class="img-preview" hidden><img alt="ตัวอย่างรูปภาพ"><button type="button" id="imgRemove" class="ghost small">ลบรูป</button></div>
       <label class="fld"><span>หมวดหมู่ <em>(เว้นว่างไว้ = คำของฉัน)</em></span><input id="newCat" list="catList" placeholder="คำของฉัน" autocomplete="off"></label>
@@ -165,8 +166,12 @@
     <details class="manage-card bulk">
       <summary>วางหลายคำพร้อมกัน</summary>
       <div class="stack">
-        <p class="hint">หนึ่งคำต่อบรรทัด รูปแบบ <b>english = ไทย</b> หรือ <b>english = ไทย = ตัวอย่างประโยค</b> ใช้หมวดหมู่จากช่องด้านบน</p>
-        <textarea id="bulkText" rows="6" placeholder="apple = แอปเปิล&#10;ticket = ตั๋ว = I need a ticket." spellcheck="false"></textarea>
+        <p class="hint">หนึ่งคำต่อบรรทัด ใช้ได้ 3 รูปแบบ ใช้หมวดหมู่จากช่องด้านบน<br>
+          <b>english /ipa/ คำอ่านไทย ความหมาย</b> เช่น stretched /stretʃt/ สเตรชท์ ถูกขึงให้ตึง<br>
+          <b>english ความหมายไทย</b> เช่น bridge สะพาน<br>
+          <b>english = ไทย = ตัวอย่างประโยค</b> (ตัวอย่างประโยคไม่บังคับ)<br>
+          ถ้ามีคำอ่านไทย ให้ใส่คำอ่านเป็นคำแรกหลัง IPA แล้วเว้นวรรคก่อนความหมาย</p>
+        <textarea id="bulkText" rows="6" placeholder="stretched /stretʃt/ สเตรชท์ ถูกขึงให้ตึง&#10;bridge สะพาน&#10;ticket = ตั๋ว = I need a ticket." spellcheck="false"></textarea>
         <button type="button" id="bulkAdd" class="primary">เพิ่มทั้งหมด</button>
       </div>
     </details>

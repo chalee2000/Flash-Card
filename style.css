@@ -7,7 +7,7 @@
   --shadow:rgba(22,33,63,.16);
   --font-ui:"IBM Plex Sans Thai","Sarabun","Noto Sans Thai",system-ui,sans-serif;
   --font-word:"Fraunces","Noto Serif",Georgia,serif;
-  --font-ipa:"Noto Sans","DejaVu Sans",system-ui,sans-serif;
+  --font-ipa:"Noto Sans","IBM Plex Sans Thai","DejaVu Sans",system-ui,sans-serif;
   color-scheme:light}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0e1322;--bg2:#222a44;--fg:#e8ecf8;--muted:#9aa5c4;--card:#182038;--line:#33406a;

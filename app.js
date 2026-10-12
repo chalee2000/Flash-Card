@@ -36,7 +36,7 @@ function render() {
   $("cardTag").textContent = cat;
   renderPic(en);
   $("word").textContent = en; $("meaning").textContent = th; $("example").textContent = ex || "";
-  $("phon").textContent = ipaOf(en) + (known.has(en) ? "  ✓ จำได้แล้ว" : "");
+  $("phon").textContent = phonLine(en) + (known.has(en) ? "  ✓ จำได้แล้ว" : "");
   $("status").textContent = `การ์ด ${idx + 1}/${deck.length} · จำได้แล้ว ${known.size}/${total} คำ`;
 }
 
@@ -193,7 +193,7 @@ function showQuestion() {
   }
   Q.opts = shuffled(opts); Q.answered = false; Q.cur = w;
   $("qWord").textContent = w[p];
-  $("qPhon").textContent = Q.dir === "en" ? ipaOf(w[0]) : "";
+  $("qPhon").textContent = Q.dir === "en" ? phonLine(w[0]) : "";
   show("qSpeak", Q.dir === "en");
   $("opts").replaceChildren(...Q.opts.map((o, k) => {
     const b = document.createElement("button");
@@ -385,6 +385,8 @@ function showPreview() {
 const norm = s => s.trim().toLowerCase();
 const exists = (en, skip = -1) => WORDS.some(w => norm(w[0]) === norm(en)) || custom.some((c, i) => i !== skip && norm(c[0]) === norm(en));
 const ipaOf = en => { const c = custom.find(c => c[0] === en); return (c && c[4]) || IPA[en] || ""; };
+const readOf = en => { const c = custom.find(c => c[0] === en); return (c && c[6]) || ""; };
+const phonLine = en => [ipaOf(en), readOf(en)].filter(Boolean).join("  ·  ");
 const msg = (text, ok = true) => { $("manageMsg").textContent = text; $("manageMsg").className = "feedback " + (ok ? "ok" : "no"); };
 const RESERVED = "ทั้งหมด";
 
@@ -409,7 +411,7 @@ function renderCustomList() {
     const c = custom[i], li = document.createElement("li"), info = document.createElement("div"), act = document.createElement("div");
     li.className = "cw"; info.className = "cw-info"; act.className = "cw-act";
     const en = document.createElement("strong"), th = document.createElement("span"), meta = document.createElement("small");
-    en.textContent = c[0]; th.textContent = c[1]; meta.textContent = [c[3] || DEFAULT_CAT, c[4]].filter(Boolean).join(" · ");
+    en.textContent = c[0]; th.textContent = c[1]; meta.textContent = [c[3] || DEFAULT_CAT, c[4], c[6]].filter(Boolean).join(" · ");
     info.append(en, th, meta);
     act.append(btn("แก้ไข", "ghost small", () => startEdit(i)), btn(delArmed === i ? "กดอีกครั้ง" : "ลบ", "small " + (delArmed === i ? "bad" : "ghost"), () => deleteWord(i)));
     if (c[5]) { const t = document.createElement("img"); t.className = "thumb"; t.src = c[5]; t.alt = ""; li.append(t); }
@@ -426,7 +428,7 @@ function resetForm() {
 function startEdit(i) {
   const c = custom[i];
   editing = i;
-  $("newEn").value = c[0]; $("newTh").value = c[1]; $("newEx").value = c[2] || ""; $("newIpa").value = c[4] || ""; $("newCat").value = c[3] && c[3] !== DEFAULT_CAT ? c[3] : "";
+  $("newEn").value = c[0]; $("newTh").value = c[1]; $("newEx").value = c[2] || ""; $("newIpa").value = c[4] || ""; $("newRead").value = c[6] || ""; $("newCat").value = c[3] && c[3] !== DEFAULT_CAT ? c[3] : "";
   pendingImg = c[5] || ""; $("newImg").value = ""; showPreview();
   $("formTitle").textContent = "แก้ไขคำ"; $("saveWord").textContent = "บันทึกการแก้ไข"; show("cancelEdit", true);
   msg("");
@@ -452,7 +454,7 @@ function deleteWord(i) {
 $("wordForm").onsubmit = e => {
   e.preventDefault();
   const en = $("newEn").value.trim(), th = $("newTh").value.trim(), ex = $("newEx").value.trim();
-  const ipa = $("newIpa").value.trim(), cat = $("newCat").value.trim() || DEFAULT_CAT, img = pendingImg;
+  const ipa = $("newIpa").value.trim(), read = $("newRead").value.trim(), cat = $("newCat").value.trim() || DEFAULT_CAT, img = pendingImg;
   if (!en || !th) return msg("กรอกคำอังกฤษและคำแปลไทยให้ครบ", false);
   if (cat === RESERVED) return msg(`ชื่อหมวด "${RESERVED}" ใช้ไม่ได้ กรุณาตั้งชื่ออื่น`, false);
   if (exists(en, editing)) return msg(`มีคำว่า "${en}" อยู่แล้ว`, false);
@@ -460,11 +462,11 @@ $("wordForm").onsubmit = e => {
   if (editing >= 0) {
     k = editing;
     const old = custom[k][0];
-    custom[k] = [en, th, ex, cat, ipa, img];
+    custom[k] = [en, th, ex, cat, ipa, img, read];
     if (old !== en && known.has(old)) { known.delete(old); known.add(en); save(KEY_KNOWN, [...known]); }
     text = `แก้ไข "${en}" แล้ว`;
   } else {
-    custom.push([en, th, ex, cat, ipa, img]); k = custom.length - 1;
+    custom.push([en, th, ex, cat, ipa, img, read]); k = custom.length - 1;
     text = `เพิ่ม "${en}" แล้ว`;
   }
   let ok = true;
@@ -492,6 +494,23 @@ $("imgRemove").onclick = () => { pendingImg = ""; $("newImg").value = ""; showPr
 
 $("cancelEdit").onclick = () => { resetForm(); msg(""); };
 
+// รองรับ 3 รูปแบบ: "en /ipa/ คำอ่าน ความหมาย", "en ความหมายไทย" และ "en = ไทย = ตัวอย่าง"
+function parseLine(line) {
+  if (line.includes("=")) {
+    const p = line.split("=").map(s => s.trim());
+    return { en: p[0], th: p[1] || "", ex: p.slice(2).join("=").trim(), ipa: "", read: "" };
+  }
+  const m = line.match(/^(.+?)\s*(\/[^\/]+\/)\s*(.*)$/);
+  if (m) {
+    const toks = m[3].split(/\s+/).filter(Boolean);
+    const read = toks.length > 1 ? toks[0] : "";
+    return { en: m[1].trim(), th: (toks.length > 1 ? toks.slice(1) : toks).join(" "), ex: "", ipa: m[2], read };
+  }
+  const t = line.search(/[\u0E00-\u0E7F]/);
+  if (t > 0) return { en: line.slice(0, t).trim(), th: line.slice(t).trim(), ex: "", ipa: "", read: "" };
+  return { en: line, th: "", ex: "", ipa: "", read: "" };
+}
+
 $("bulkAdd").onclick = () => {
   const cat = $("newCat").value.trim() || DEFAULT_CAT;
   if (cat === RESERVED) return msg(`ชื่อหมวด "${RESERVED}" ใช้ไม่ได้ กรุณาตั้งชื่ออื่น`, false);
@@ -500,11 +519,10 @@ $("bulkAdd").onclick = () => {
   for (const raw of $("bulkText").value.split(/\r?\n/)) {
     const line = raw.trim();
     if (!line) continue;
-    const parts = line.split("=").map(s => s.trim());
-    const en = parts[0], th = parts[1] || "", ex = parts.slice(2).join("=").trim();
+    const { en, th, ex, ipa, read } = parseLine(line);
     if (!en || !th) { skipped.push(`"${line}" (รูปแบบไม่ถูกต้อง)`); continue; }
     if (exists(en)) { skipped.push(`"${en}" (มีอยู่แล้ว)`); continue; }
-    custom.push([en, th, ex, cat, ""]); added++;
+    custom.push([en, th, ex, cat, ipa, "", read]); added++;
   }
   if (!added && !skipped.length) return msg("ยังไม่ได้วางรายการคำ", false);
   msg(`เพิ่ม ${added} คำ` + (skipped.length ? ` · ข้าม ${skipped.length} บรรทัด: ${skipped.slice(0, 3).join(", ")}${skipped.length > 3 ? " ..." : ""}` : ""), added > 0);
