@@ -1,6 +1,6 @@
 const KEY_KNOWN = "flashcard.known", KEY_CUSTOM = "flashcard.custom";
 const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
-const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
 const DEFAULT_CAT = "คำของฉัน";
 
 let custom = load(KEY_CUSTOM, []);
@@ -29,14 +29,24 @@ function render() {
   const total = allWords().length;
   $("bar").style.width = (known.size / total * 100) + "%";
   if (!deck.length) {
-    $("word").textContent = "🎉 ไม่มีการ์ดเหลือ"; $("phon").textContent = ""; $("meaning").textContent = ""; $("example").textContent = ""; $("cardTag").textContent = "";
+    $("word").textContent = "🎉 ไม่มีการ์ดเหลือ"; $("phon").textContent = ""; $("meaning").textContent = ""; $("example").textContent = ""; $("cardTag").textContent = ""; $("pic").hidden = true;
     $("status").textContent = `จำได้แล้ว ${known.size}/${total} คำ`; return;
   }
   const [en, th, ex, cat] = deck[idx];
   $("cardTag").textContent = cat;
+  renderPic(en);
   $("word").textContent = en; $("meaning").textContent = th; $("example").textContent = ex || "";
   $("phon").textContent = ipaOf(en) + (known.has(en) ? "  ✓ จำได้แล้ว" : "");
   $("status").textContent = `การ์ด ${idx + 1}/${deck.length} · จำได้แล้ว ${known.size}/${total} คำ`;
+}
+
+function renderPic(en) {
+  const box = $("pic"), p = picOf(en);
+  box.replaceChildren();
+  box.hidden = !p;
+  if (!p) return;
+  if (p.img) { const im = document.createElement("img"); im.src = p.img; im.alt = ""; box.append(im); }
+  else box.textContent = p.emoji;
 }
 
 const flip = () => $("card").classList.toggle("flipped");
@@ -344,6 +354,34 @@ $("gameAgain").onclick = gameSetup;
 // ---------- เพิ่มคำของฉัน ----------
 let editing = -1, delArmed = -1, delTimer = null;
 const saveCustom = () => save(KEY_CUSTOM, custom);
+let pendingImg = "";
+const picOf = en => { const c = custom.find(c => c[0] === en); return c && c[5] ? { img: c[5] } : PIC[en] ? { emoji: PIC[en] } : null; };
+
+function readImage(file) {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onerror = () => reject(new Error("read"));
+    fr.onload = () => {
+      const im = new Image();
+      im.onerror = () => reject(new Error("decode"));
+      im.onload = () => {
+        const s = Math.min(1, 320 / Math.max(im.width, im.height, 1));
+        const c = document.createElement("canvas");
+        c.width = Math.max(1, Math.round(im.width * s)); c.height = Math.max(1, Math.round(im.height * s));
+        const g = c.getContext("2d");
+        g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+        resolve(c.toDataURL("image/jpeg", 0.8));
+      };
+      im.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+
+function showPreview() {
+  show("imgPreview", !!pendingImg);
+  if (pendingImg) $("imgPreview").querySelector("img").src = pendingImg;
+}
 const norm = s => s.trim().toLowerCase();
 const exists = (en, skip = -1) => WORDS.some(w => norm(w[0]) === norm(en)) || custom.some((c, i) => i !== skip && norm(c[0]) === norm(en));
 const ipaOf = en => { const c = custom.find(c => c[0] === en); return (c && c[4]) || IPA[en] || ""; };
@@ -351,7 +389,7 @@ const msg = (text, ok = true) => { $("manageMsg").textContent = text; $("manageM
 const RESERVED = "ทั้งหมด";
 
 function refreshAfterChange() {
-  saveCustom(); buildCategories(); buildDeck(); renderCustomList(); renderCatList();
+  buildCategories(); buildDeck(); renderCustomList(); renderCatList();
 }
 
 function renderCatList() {
@@ -374,13 +412,14 @@ function renderCustomList() {
     en.textContent = c[0]; th.textContent = c[1]; meta.textContent = [c[3] || DEFAULT_CAT, c[4]].filter(Boolean).join(" · ");
     info.append(en, th, meta);
     act.append(btn("แก้ไข", "ghost small", () => startEdit(i)), btn(delArmed === i ? "กดอีกครั้ง" : "ลบ", "small " + (delArmed === i ? "bad" : "ghost"), () => deleteWord(i)));
+    if (c[5]) { const t = document.createElement("img"); t.className = "thumb"; t.src = c[5]; t.alt = ""; li.append(t); }
     li.append(info, act);
     return li;
   }));
 }
 
 function resetForm() {
-  editing = -1; $("wordForm").reset();
+  editing = -1; $("wordForm").reset(); pendingImg = ""; showPreview();
   $("formTitle").textContent = "เพิ่มคำใหม่"; $("saveWord").textContent = "เพิ่มคำ"; show("cancelEdit", false);
 }
 
@@ -388,6 +427,7 @@ function startEdit(i) {
   const c = custom[i];
   editing = i;
   $("newEn").value = c[0]; $("newTh").value = c[1]; $("newEx").value = c[2] || ""; $("newIpa").value = c[4] || ""; $("newCat").value = c[3] && c[3] !== DEFAULT_CAT ? c[3] : "";
+  pendingImg = c[5] || ""; $("newImg").value = ""; showPreview();
   $("formTitle").textContent = "แก้ไขคำ"; $("saveWord").textContent = "บันทึกการแก้ไข"; show("cancelEdit", true);
   msg("");
   try { $("wordForm").scrollIntoView({ behavior: "smooth", block: "start" }); } catch {}
@@ -406,31 +446,49 @@ function deleteWord(i) {
   known.delete(en); save(KEY_KNOWN, [...known]);
   if (editing === i) resetForm(); else if (editing > i) editing--;
   msg(`ลบ "${en}" แล้ว`);
-  refreshAfterChange();
+  saveCustom(); refreshAfterChange();
 }
 
 $("wordForm").onsubmit = e => {
   e.preventDefault();
   const en = $("newEn").value.trim(), th = $("newTh").value.trim(), ex = $("newEx").value.trim();
-  const ipa = $("newIpa").value.trim(), cat = $("newCat").value.trim() || DEFAULT_CAT;
+  const ipa = $("newIpa").value.trim(), cat = $("newCat").value.trim() || DEFAULT_CAT, img = pendingImg;
   if (!en || !th) return msg("กรอกคำอังกฤษและคำแปลไทยให้ครบ", false);
   if (cat === RESERVED) return msg(`ชื่อหมวด "${RESERVED}" ใช้ไม่ได้ กรุณาตั้งชื่ออื่น`, false);
   if (exists(en, editing)) return msg(`มีคำว่า "${en}" อยู่แล้ว`, false);
+  let text, k;
   if (editing >= 0) {
-    const old = custom[editing][0];
-    custom[editing] = [en, th, ex, cat, ipa];
+    k = editing;
+    const old = custom[k][0];
+    custom[k] = [en, th, ex, cat, ipa, img];
     if (old !== en && known.has(old)) { known.delete(old); known.add(en); save(KEY_KNOWN, [...known]); }
-    msg(`แก้ไข "${en}" แล้ว`);
-    resetForm();
+    text = `แก้ไข "${en}" แล้ว`;
   } else {
-    custom.push([en, th, ex, cat, ipa]);
-    msg(`เพิ่ม "${en}" แล้ว`);
-    resetForm();
-    $("newCat").value = cat === DEFAULT_CAT ? "" : cat; // เก็บหมวดไว้เพิ่มคำต่อเนื่อง
+    custom.push([en, th, ex, cat, ipa, img]); k = custom.length - 1;
+    text = `เพิ่ม "${en}" แล้ว`;
   }
+  let ok = true;
+  if (!saveCustom()) {
+    if (img) { custom[k][5] = ""; ok = saveCustom(); text += ok ? " (รูปใหญ่เกินพื้นที่เก็บข้อมูลของเบราว์เซอร์ จึงบันทึกโดยไม่มีรูป)" : " (บันทึกลงเบราว์เซอร์ไม่สำเร็จ)"; }
+    else { ok = false; text += " (บันทึกลงเบราว์เซอร์ไม่สำเร็จ)"; }
+    ok = false;
+  }
+  const keepCat = editing < 0;
+  resetForm();
+  if (keepCat) $("newCat").value = cat === DEFAULT_CAT ? "" : cat; // เก็บหมวดไว้เพิ่มคำต่อเนื่อง
+  msg(text, ok);
   refreshAfterChange();
   $("newEn").focus();
 };
+
+$("newImg").onchange = async () => {
+  const f = $("newImg").files[0];
+  if (!f) return;
+  if (!f.type.startsWith("image/")) { $("newImg").value = ""; return msg("เลือกไฟล์รูปภาพเท่านั้น", false); }
+  try { pendingImg = await readImage(f); showPreview(); msg(""); }
+  catch { $("newImg").value = ""; msg("เปิดไฟล์รูปนี้ไม่ได้ ลองรูปอื่น", false); }
+};
+$("imgRemove").onclick = () => { pendingImg = ""; $("newImg").value = ""; showPreview(); };
 
 $("cancelEdit").onclick = () => { resetForm(); msg(""); };
 
@@ -451,7 +509,7 @@ $("bulkAdd").onclick = () => {
   if (!added && !skipped.length) return msg("ยังไม่ได้วางรายการคำ", false);
   msg(`เพิ่ม ${added} คำ` + (skipped.length ? ` · ข้าม ${skipped.length} บรรทัด: ${skipped.slice(0, 3).join(", ")}${skipped.length > 3 ? " ..." : ""}` : ""), added > 0);
   if (added && !skipped.length) $("bulkText").value = "";
-  if (added) refreshAfterChange();
+  if (added) { saveCustom(); refreshAfterChange(); }
 };
 $("modeManage").onclick = () => setMode("manage");
 

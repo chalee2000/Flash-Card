@@ -63,6 +63,7 @@
         </div>
         <div class="face paper back">
           <span class="tag">คำแปล</span>
+          <div id="pic" class="pic" aria-hidden="true" hidden></div>
           <span id="meaning" class="meaning"></span>
           <small id="example" class="ex"></small>
         </div>
@@ -151,6 +152,8 @@
       <label class="fld"><span>ภาษาไทย</span><input id="newTh" required autocomplete="off"></label>
       <label class="fld"><span>ตัวอย่างประโยค <em>(ไม่บังคับ)</em></span><input id="newEx" autocomplete="off"></label>
       <label class="fld"><span>IPA <em>(ไม่บังคับ)</em></span><input id="newIpa" placeholder="/həˈloʊ/" autocomplete="off"></label>
+      <label class="fld"><span>รูปภาพ <em>(ไม่บังคับ)</em></span><input id="newImg" type="file" accept="image/*"></label>
+      <div id="imgPreview" class="img-preview" hidden><img alt="ตัวอย่างรูปภาพ"><button type="button" id="imgRemove" class="ghost small">ลบรูป</button></div>
       <label class="fld"><span>หมวดหมู่ <em>(เว้นว่างไว้ = คำของฉัน)</em></span><input id="newCat" list="catList" placeholder="คำของฉัน" autocomplete="off"></label>
       <datalist id="catList"></datalist>
       <div class="controls">
@@ -188,6 +191,7 @@
 </main>
 <script src="words.js"></script>
 <script src="ipa.js"></script>
+<script src="emoji.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

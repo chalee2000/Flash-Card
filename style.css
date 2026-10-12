@@ -82,23 +82,23 @@ kbd{background:var(--bg2);padding:1px 6px;border-radius:5px;font-family:inherit;
 
 /* index card */
 .paper{background-color:var(--card);background-image:linear-gradient(var(--margin),var(--margin)),repeating-linear-gradient(to bottom,transparent 0 27px,var(--rule) 27px 28px);background-size:100% 2px,100% calc(100% - 52px);background-position:0 46px,0 50px;background-repeat:no-repeat}
-.card{position:relative;isolation:isolate;perspective:1200px;height:300px;cursor:pointer;outline:none;margin-bottom:10px}
+.card{position:relative;isolation:isolate;perspective:1200px;height:340px;cursor:pointer;outline:none;margin-bottom:10px}
 .card::before,.card::after{content:"";position:absolute;left:0;right:0;top:0;bottom:0;border-radius:18px;background:var(--card);border:1px solid var(--line);z-index:-1}
 .card::before{transform:translateY(7px) scale(.97)}
 .card::after{transform:translateY(14px) scale(.94);opacity:.7}
 .card:focus-visible .inner{outline:3px solid var(--accent);outline-offset:3px}
 .inner{position:relative;width:100%;height:100%;transition:transform .55s cubic-bezier(.3,.8,.3,1);transform-style:preserve-3d;border-radius:18px;box-shadow:0 10px 28px var(--shadow)}
 .card.flipped .inner{transform:rotateY(180deg)}
-.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:18px;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:56px 20px 18px;text-align:center;overflow-wrap:anywhere}
-.back{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:18px;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:safe center;gap:12px;padding:52px 20px 16px;text-align:center;overflow-wrap:anywhere;overflow-y:auto}
+.back{transform:rotateY(180deg);gap:6px}
 .tag{position:absolute;top:14px;left:18px;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .speak{position:absolute;top:6px;right:10px;width:36px;height:36px;padding:0;border:none;border-radius:50%;background:var(--bg2);color:var(--accent)}
 .speak .ic{width:18px;height:18px}
 .word{font-family:var(--font-word);font-weight:700;font-size:clamp(2rem,9vw,2.9rem);line-height:1.1}
 .phon{font-family:var(--font-ipa);font-size:1rem;color:var(--muted)}
 .phon:empty{display:none}
-.meaning{font-size:clamp(1.8rem,7.5vw,2.3rem);font-weight:700;line-height:1.25;color:var(--accent)}
-.ex{font-size:.95rem;padding:3px 8px;border-radius:6px;background:var(--mark-soft);font-family:var(--font-ipa)}
+.meaning{font-size:clamp(1.6rem,6.8vw,2.1rem);font-weight:700;line-height:1.25;color:var(--accent)}
+.ex{font-size:.9rem;padding:3px 8px;border-radius:6px;background:var(--mark-soft);font-family:var(--font-ipa)}
 .ex:empty{display:none}
 
 /* add word */
@@ -162,4 +162,10 @@ kbd{background:var(--bg2);padding:1px 6px;border-radius:5px;font-family:inherit;
 .small{padding:6px 10px;font-size:.85rem;border-radius:10px}
 .custom-list .empty{color:var(--muted);text-align:center;padding:10px}
 
+/* picture on the meaning side */
+.pic{display:flex;justify-content:center;font-size:56px;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+.pic img{max-height:88px;max-width:100%;border-radius:12px;object-fit:contain;border:1px solid var(--line)}
+.img-preview{display:flex;align-items:center;gap:10px}
+.img-preview img{max-height:80px;max-width:140px;border-radius:10px;border:1px solid var(--line)}
+.thumb{width:44px;height:44px;object-fit:cover;border-radius:8px;flex:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
