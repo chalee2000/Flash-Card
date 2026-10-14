@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Flash Card ศัพท์อังกฤษ-ไทย</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Noto+Sans:wght@400&display=swap">
 <link rel="stylesheet" href="style.css">
@@ -20,8 +20,13 @@
   <symbol id="i-left" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
   <symbol id="i-right" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
   <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></symbol>
 </svg>
-<main>
+
+<div class="app">
   <header class="top">
     <div class="brand">
       <span class="logo" aria-hidden="true">Aa</span>
@@ -33,167 +38,228 @@
     </div>
   </header>
 
-  <div class="tabs" role="group" aria-label="โหมด">
-    <button id="modeStudy" aria-pressed="true"><svg class="ic"><use href="#i-book"/></svg>ท่องศัพท์</button>
-    <button id="modeQuiz" aria-pressed="false"><svg class="ic"><use href="#i-quiz"/></svg>แบบทดสอบ</button>
-    <button id="modeGame" aria-pressed="false"><svg class="ic"><use href="#i-game"/></svg>เกมจับคู่</button>
-    <button id="modeManage" aria-pressed="false"><svg class="ic"><use href="#i-plus"/></svg>เพิ่มคำ</button>
-  </div>
+  <nav class="tabs" aria-label="โหมด">
+    <button id="modeStudy" aria-pressed="true"><svg class="ic"><use href="#i-book"/></svg><span>ท่องศัพท์</span></button>
+    <button id="modeQuiz" aria-pressed="false"><svg class="ic"><use href="#i-quiz"/></svg><span>แบบทดสอบ</span></button>
+    <button id="modeGame" aria-pressed="false"><svg class="ic"><use href="#i-game"/></svg><span>เกมจับคู่</span></button>
+    <button id="modeManage" aria-pressed="false"><svg class="ic"><use href="#i-plus"/></svg><span>เพิ่มคำ</span></button>
+  </nav>
 
-  <div id="mainToolbar" class="toolbar">
-    <select id="category" aria-label="หมวดหมู่"></select>
-    <div id="studyTools" class="toolrest">
-      <button id="shuffle" class="ghost"><svg class="ic"><use href="#i-shuffle"/></svg>สลับ</button>
-      <button id="reset" class="ghost">รีเซ็ต</button>
-      <label class="check"><input type="checkbox" id="hideKnown"> ซ่อนคำที่จำได้แล้ว</label>
+  <main>
+    <div id="mainToolbar" class="toolbar">
+      <select id="category" aria-label="หมวดหมู่"></select>
+      <div id="studyTools" class="toolrest">
+        <button id="shuffle" class="ghost"><svg class="ic"><use href="#i-shuffle"/></svg>สลับ</button>
+      </div>
     </div>
-  </div>
 
-  <div id="study" class="stack">
-    <div class="progress"><div id="bar"></div></div>
-    <p id="status" class="status"></p>
-
-    <div id="card" class="card" tabindex="0" role="button" aria-label="พลิกการ์ด">
-      <div class="inner">
-        <div class="face paper front">
-          <span id="cardTag" class="tag"></span>
-          <button id="speak" class="speak" title="ฟังเสียง" aria-label="ฟังเสียง"><svg class="ic"><use href="#i-sound"/></svg></button>
-          <span id="word" class="word"></span>
-          <small id="phon" class="phon"></small>
-        </div>
-        <div class="face paper back">
-          <span class="tag">คำแปล</span>
-          <div id="pic" class="pic" aria-hidden="true" hidden></div>
-          <span id="meaning" class="meaning"></span>
-          <small id="example" class="ex"></small>
+    <div id="study" class="stack">
+      <div class="progress-row">
+        <div class="progress"><div id="bar"></div></div>
+        <div class="meta-row">
+          <span id="status" class="status"></span>
+          <div class="meta-act">
+            <label class="chip-toggle"><input type="checkbox" id="hideKnown"><span>ซ่อนที่จำแล้ว</span></label>
+            <button id="reset" class="link">รีเซ็ต</button>
+          </div>
         </div>
       </div>
-    </div>
-    <p class="hint kbd-hint">แตะการ์ดหรือกด <kbd>Space</kbd> เพื่อพลิก · <kbd>←</kbd> <kbd>→</kbd> เปลี่ยนการ์ด · <kbd>K</kbd> จำได้แล้ว</p>
 
-    <div class="controls study">
-      <button id="unknown" class="bad"><svg class="ic"><use href="#i-x"/></svg>ยังไม่จำ</button>
-      <button id="known" class="good"><svg class="ic"><use href="#i-check"/></svg>จำได้แล้ว</button>
-      <button id="prev" class="ghost"><svg class="ic"><use href="#i-left"/></svg>ก่อนหน้า</button>
-      <button id="next" class="ghost">ถัดไป<svg class="ic"><use href="#i-right"/></svg></button>
-    </div>
-
-  </div>
-
-  <section id="quiz" hidden>
-    <div id="quizSetup" class="quiz-box">
-      <p id="quizInfo" class="status"></p>
-      <div class="toolbar">
-        <select id="quizDir" aria-label="ทิศทางคำถาม">
-          <option value="en">อังกฤษ → ไทย</option>
-          <option value="th">ไทย → อังกฤษ</option>
-        </select>
-        <select id="quizCount" aria-label="จำนวนข้อ">
-          <option value="10">10 ข้อ</option>
-          <option value="20">20 ข้อ</option>
-          <option value="30">30 ข้อ</option>
-        </select>
+      <div id="card" class="card" tabindex="0" role="button" aria-label="พลิกการ์ด">
+        <div class="inner">
+          <div class="face paper front">
+            <span id="cardTag" class="tag"></span>
+            <button id="speak" class="speak" title="ฟังเสียง" aria-label="ฟังเสียง"><svg class="ic"><use href="#i-sound"/></svg></button>
+            <span id="word" class="word"></span>
+            <small id="phon" class="phon"></small>
+            <span class="flip-hint" aria-hidden="true">แตะเพื่อดูคำแปล</span>
+          </div>
+          <div class="face paper back">
+            <span class="tag">คำแปล</span>
+            <div id="pic" class="pic" aria-hidden="true" hidden></div>
+            <span id="meaning" class="meaning"></span>
+            <small id="example" class="ex"></small>
+          </div>
+        </div>
+        <div class="stamp" aria-hidden="true"><span><svg class="ic"><use href="#i-check"/></svg></span></div>
       </div>
-      <div class="controls"><button id="quizStart" class="primary big">เริ่มทดสอบ</button></div>
-    </div>
 
-    <div id="quizPlay" class="quiz-box" hidden>
-      <p id="quizStatus" class="status"></p>
-      <div class="progress"><div id="quizBar"></div></div>
-      <div class="q-prompt paper">
-        <button id="qSpeak" class="speak" title="ฟังเสียง" aria-label="ฟังเสียง"><svg class="ic"><use href="#i-sound"/></svg></button>
-        <span id="qWord" class="q-word"></span>
-        <small id="qPhon" class="phon"></small>
+      <div class="mark-row">
+        <button id="unknown" class="bad"><svg class="ic"><use href="#i-x"/></svg>ยังไม่จำ</button>
+        <button id="known" class="good"><svg class="ic"><use href="#i-check"/></svg>จำได้แล้ว</button>
       </div>
-      <div id="opts" class="opts"></div>
-      <p id="qFeedback" class="feedback" aria-live="polite"></p>
-      <p id="qExample" class="q-example"></p>
-      <div class="controls"><button id="qNext" class="primary big" hidden>ถัดไป</button></div>
-      <p class="hint kbd-hint">กด <kbd>1</kbd>–<kbd>4</kbd> เพื่อตอบ · <kbd>Enter</kbd> ข้อถัดไป</p>
-    </div>
-
-    <div id="quizResult" class="quiz-box" hidden>
-      <p id="resScore" class="q-word"></p>
-      <p id="resMsg" class="status"></p>
-      <p id="resPoints" class="res-points"></p>
-      <ul id="resBadges" class="res-badges"></ul>
-      <ul id="resWrong" class="wrong-list"></ul>
-      <div class="controls">
-        <button id="retryWrong" hidden>ทำข้อที่ผิดซ้ำ</button>
-        <button id="quizAgain" class="primary">ทำใหม่</button>
+      <div class="nav-row">
+        <button id="prev" class="round" aria-label="การ์ดก่อนหน้า"><svg class="ic"><use href="#i-left"/></svg></button>
+        <span id="counter" class="counter"></span>
+        <button id="next" class="round" aria-label="การ์ดถัดไป"><svg class="ic"><use href="#i-right"/></svg></button>
       </div>
-    </div>
-  </section>
-
-  <section id="game" hidden>
-    <div id="gameSetup" class="quiz-box">
-      <p id="gameInfo" class="status"></p>
-      <div class="controls"><button id="gameStart" class="primary big">เริ่มเล่น</button></div>
-      <p class="hint">จับคู่คำอังกฤษกับคำแปลไทยให้ครบ 6 คู่ ยิ่งพลิกน้อยยิ่งได้แต้มมาก</p>
+      <p class="hint kbd-hint">กด <kbd>Space</kbd> พลิก · <kbd>←</kbd> <kbd>→</kbd> เปลี่ยนการ์ด · <kbd>K</kbd> จำได้แล้ว</p>
+      <p class="hint touch-hint">ปัดการ์ดซ้ายหรือขวาเพื่อเปลี่ยนการ์ด</p>
     </div>
 
-    <div id="gamePlay" class="quiz-box" hidden>
-      <p id="gameStatus" class="status"></p>
-      <div id="board" class="board"></div>
-    </div>
-
-    <div id="gameResult" class="quiz-box" hidden>
-      <p id="gResScore" class="q-word"></p>
-      <p id="gResPoints" class="res-points"></p>
-      <ul id="gResBadges" class="res-badges"></ul>
-      <div class="controls"><button id="gameAgain" class="primary">เล่นอีกครั้ง</button></div>
-    </div>
-  </section>
-
-  <section id="manage" hidden>
-    <form id="wordForm" class="manage-card">
-      <h2 id="formTitle" class="rw-title">เพิ่มคำใหม่</h2>
-      <label class="fld"><span>English</span><input id="newEn" required autocomplete="off" autocapitalize="none" spellcheck="false"></label>
-      <label class="fld"><span>ภาษาไทย</span><input id="newTh" required autocomplete="off"></label>
-      <label class="fld"><span>ตัวอย่างประโยค <em>(ไม่บังคับ)</em></span><input id="newEx" autocomplete="off"></label>
-      <label class="fld"><span>IPA <em>(ไม่บังคับ)</em></span><input id="newIpa" placeholder="/həˈloʊ/" autocomplete="off"></label>
-      <label class="fld"><span>คำอ่านไทย <em>(ไม่บังคับ)</em></span><input id="newRead" placeholder="สเตรชท์" autocomplete="off"></label>
-      <label class="fld"><span>รูปภาพ <em>(ไม่บังคับ)</em></span><input id="newImg" type="file" accept="image/*"></label>
-      <div id="imgPreview" class="img-preview" hidden><img alt="ตัวอย่างรูปภาพ"><button type="button" id="imgRemove" class="ghost small">ลบรูป</button></div>
-      <label class="fld"><span>หมวดหมู่ <em>(เว้นว่างไว้ = คำของฉัน)</em></span><input id="newCat" list="catList" placeholder="คำของฉัน" autocomplete="off"></label>
-      <datalist id="catList"></datalist>
-      <div class="controls">
-        <button id="saveWord" class="primary">เพิ่มคำ</button>
-        <button type="button" id="cancelEdit" class="ghost" hidden>ยกเลิก</button>
+    <section id="quiz" hidden>
+      <div id="quizSetup" class="panel setup">
+        <div class="panel-head"><h2 class="panel-title">แบบทดสอบ</h2></div>
+        <p id="quizInfo" class="status left"></p>
+        <fieldset>
+          <legend>ทิศทางคำถาม</legend>
+          <div class="seg">
+            <label><input type="radio" name="quizDir" value="en" checked><span>อังกฤษ → ไทย</span></label>
+            <label><input type="radio" name="quizDir" value="th"><span>ไทย → อังกฤษ</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>จำนวนข้อ</legend>
+          <div class="seg">
+            <label><input type="radio" name="quizCount" value="10" checked><span>10 ข้อ</span></label>
+            <label><input type="radio" name="quizCount" value="20"><span>20 ข้อ</span></label>
+            <label><input type="radio" name="quizCount" value="30"><span>30 ข้อ</span></label>
+          </div>
+        </fieldset>
+        <button id="quizStart" class="primary big block">เริ่มทดสอบ</button>
       </div>
-    </form>
 
-    <details class="manage-card bulk">
-      <summary>วางหลายคำพร้อมกัน</summary>
-      <div class="stack">
-        <p class="hint">หนึ่งคำต่อบรรทัด ใช้ได้ 3 รูปแบบ ใช้หมวดหมู่จากช่องด้านบน<br>
-          <b>english /ipa/ คำอ่านไทย ความหมาย</b> เช่น stretched /stretʃt/ สเตรชท์ ถูกขึงให้ตึง<br>
-          <b>english ความหมายไทย</b> เช่น bridge สะพาน<br>
-          <b>english = ไทย = ตัวอย่างประโยค</b> (ตัวอย่างประโยคไม่บังคับ)<br>
-          ถ้ามีคำอ่านไทย ให้ใส่คำอ่านเป็นคำแรกหลัง IPA แล้วเว้นวรรคก่อนความหมาย</p>
-        <textarea id="bulkText" rows="6" placeholder="stretched /stretʃt/ สเตรชท์ ถูกขึงให้ตึง&#10;bridge สะพาน&#10;ticket = ตั๋ว = I need a ticket." spellcheck="false"></textarea>
-        <button type="button" id="bulkAdd" class="primary">เพิ่มทั้งหมด</button>
+      <div id="quizPlay" class="quiz-box" hidden>
+        <div class="q-head">
+          <span id="quizStatus" class="status"></span>
+          <span id="ptsFloat" class="pts-float" aria-hidden="true"></span>
+        </div>
+        <div class="progress"><div id="quizBar"></div></div>
+        <div class="q-prompt paper">
+          <button id="qSpeak" class="speak" title="ฟังเสียง" aria-label="ฟังเสียง"><svg class="ic"><use href="#i-sound"/></svg></button>
+          <span id="qWord" class="q-word"></span>
+          <small id="qPhon" class="phon"></small>
+        </div>
+        <div id="opts" class="opts"></div>
+        <p id="qFeedback" class="feedback" aria-live="polite"></p>
+        <p id="qExample" class="q-example"></p>
+        <button id="qNext" class="primary big block" hidden>ถัดไป</button>
+        <p class="hint kbd-hint">กด <kbd>1</kbd>–<kbd>4</kbd> เพื่อตอบ · <kbd>Enter</kbd> ข้อถัดไป</p>
       </div>
-    </details>
 
-    <p id="manageMsg" class="feedback" aria-live="polite"></p>
+      <div id="quizResult" class="panel result" hidden>
+        <div id="resRing" class="ring">
+          <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-bg" cx="60" cy="60" r="52"/><circle class="ring-fg" cx="60" cy="60" r="52" pathLength="100"/></svg>
+          <div class="ring-txt"><b id="resPct"></b><small id="resScore"></small></div>
+        </div>
+        <p id="resMsg" class="res-msg"></p>
+        <div class="stats">
+          <div class="stat"><b id="statCorrect"></b><small>ตอบถูก</small></div>
+          <div class="stat"><b id="statPts"></b><small>แต้มที่ได้</small></div>
+          <div class="stat"><b id="statStreak"></b><small>ถูกติดกันสูงสุด</small></div>
+        </div>
+        <p id="resPoints" class="res-points"></p>
+        <ul id="resBadges" class="res-badges"></ul>
+        <div id="wrongBox" class="wrong-box" hidden>
+          <h3>ทบทวนคำที่ตอบผิด</h3>
+          <ul id="resWrong" class="wrong-list"></ul>
+        </div>
+        <div class="controls">
+          <button id="retryWrong" hidden>ทำข้อที่ผิดซ้ำ</button>
+          <button id="quizAgain" class="primary">ทำใหม่</button>
+        </div>
+      </div>
+    </section>
 
-    <div class="manage-card">
-      <div class="rw-head"><strong>คำของฉัน</strong><span id="customCount" class="status"></span></div>
-      <ul id="customList" class="custom-list"></ul>
-    </div>
-  </section>
+    <section id="game" hidden>
+      <div id="gameSetup" class="panel setup">
+        <div class="panel-head"><h2 class="panel-title">เกมจับคู่</h2></div>
+        <p id="gameInfo" class="status left"></p>
+        <p class="hint left">จับคู่คำอังกฤษกับคำแปลไทยให้ครบ 6 คู่ ยิ่งพลิกน้อยยิ่งได้แต้มมาก</p>
+        <button id="gameStart" class="primary big block">เริ่มเล่น</button>
+      </div>
 
-  <section id="rewardsPanel" class="rewards" aria-label="รางวัลของฉัน" hidden>
-    <div class="rw-head"><strong id="rwLevel"></strong><span id="rwPoints"></span></div>
-    <div class="progress"><div id="rwBar"></div></div>
-    <p id="rwNext" class="status"></p>
-    <p id="rwBest" class="status"></p>
-    <h2 class="rw-title">รางวัลของฉัน</h2>
-    <div id="badges" class="badges"></div>
-    <p class="hint">แบบทดสอบ: ตอบถูกข้อละ 10 แต้ม ถูกติดกัน 3 ข้อขึ้นไปได้โบนัส +5 ต่อข้อ เต็มทุกข้อ (อย่างน้อย 5 ข้อ) ได้เพิ่ม +50<br>เกมจับคู่: คู่ละ 10 แต้ม พลิกไม่เกิน 8 ครั้งได้เพิ่ม +40 ไม่เกิน 12 ครั้งได้เพิ่ม +20</p>
-  </section>
-</main>
+      <div id="gamePlay" class="quiz-box" hidden>
+        <p id="gameStatus" class="status"></p>
+        <div id="board" class="board"></div>
+      </div>
+
+      <div id="gameResult" class="panel result" hidden>
+        <p id="gResScore" class="res-title"></p>
+        <div class="stats">
+          <div class="stat"><b id="gStatMoves"></b><small>ครั้งที่พลิก</small></div>
+          <div class="stat"><b id="gStatTime"></b><small>เวลา</small></div>
+          <div class="stat"><b id="gStatPts"></b><small>แต้มที่ได้</small></div>
+        </div>
+        <p id="gResPoints" class="res-points"></p>
+        <ul id="gResBadges" class="res-badges"></ul>
+        <div class="controls"><button id="gameAgain" class="primary">เล่นอีกครั้ง</button></div>
+      </div>
+    </section>
+
+    <section id="manage" hidden>
+      <form id="wordForm" class="panel">
+        <div class="panel-head"><h2 id="formTitle" class="panel-title">เพิ่มคำใหม่</h2></div>
+        <div class="grid2">
+          <label class="fld"><span>English</span><input id="newEn" required autocomplete="off" autocapitalize="none" spellcheck="false"></label>
+          <label class="fld"><span>ภาษาไทย</span><input id="newTh" required autocomplete="off"></label>
+        </div>
+        <label class="fld"><span>หมวดหมู่ <em>(เว้นว่างไว้ = คำของฉัน)</em></span><input id="newCat" list="catList" placeholder="คำของฉัน" autocomplete="off"></label>
+        <datalist id="catList"></datalist>
+        <details id="moreFields" class="more">
+          <summary>รายละเอียดเพิ่มเติม <em>(ไม่บังคับ)</em></summary>
+          <div class="stack">
+            <label class="fld"><span>ตัวอย่างประโยค</span><input id="newEx" autocomplete="off"></label>
+            <div class="grid2">
+              <label class="fld"><span>IPA</span><input id="newIpa" placeholder="/həˈloʊ/" autocomplete="off"></label>
+              <label class="fld"><span>คำอ่านไทย</span><input id="newRead" placeholder="สเตรชท์" autocomplete="off"></label>
+            </div>
+            <div class="fld">
+              <span>รูปภาพ</span>
+              <input id="newImg" type="file" accept="image/*" class="vh">
+              <label id="dropZone" class="drop" for="newImg"><svg class="ic"><use href="#i-image"/></svg><span><b>เลือกรูปภาพ</b><small>หรือลากไฟล์รูปมาวางตรงนี้</small></span></label>
+              <div id="imgPreview" class="img-preview" hidden><img alt="ตัวอย่างรูปภาพ"><button type="button" id="imgRemove" class="ghost small">ลบรูป</button></div>
+            </div>
+          </div>
+        </details>
+        <div class="form-actions">
+          <button id="saveWord" class="primary">เพิ่มคำ</button>
+          <button type="button" id="cancelEdit" class="ghost" hidden>ยกเลิก</button>
+        </div>
+      </form>
+
+      <p id="manageMsg" class="feedback" aria-live="polite"></p>
+
+      <details class="panel bulk">
+        <summary>วางหลายคำพร้อมกัน</summary>
+        <div class="stack">
+          <p class="hint left">หนึ่งคำต่อบรรทัด ใช้ได้ 3 รูปแบบ ใช้หมวดหมู่จากช่องด้านบน<br>
+            <b>english /ipa/ คำอ่านไทย ความหมาย</b> เช่น stretched /stretʃt/ สเตรชท์ ถูกขึงให้ตึง<br>
+            <b>english ความหมายไทย</b> เช่น bridge สะพาน<br>
+            <b>english = ไทย = ตัวอย่างประโยค</b> (ตัวอย่างประโยคไม่บังคับ)<br>
+            ถ้ามีคำอ่านไทย ให้ใส่คำอ่านเป็นคำแรกหลัง IPA แล้วเว้นวรรคก่อนความหมาย</p>
+          <textarea id="bulkText" rows="6" placeholder="stretched /stretʃt/ สเตรชท์ ถูกขึงให้ตึง&#10;bridge สะพาน&#10;ticket = ตั๋ว = I need a ticket." spellcheck="false"></textarea>
+          <button type="button" id="bulkAdd" class="primary">เพิ่มทั้งหมด</button>
+        </div>
+      </details>
+
+      <div class="panel">
+        <div class="panel-head"><h2 class="panel-title">คำของฉัน</h2><span id="customCount" class="status"></span></div>
+        <div id="searchWrap" class="search"><svg class="ic"><use href="#i-search"/></svg><input id="listSearch" type="search" placeholder="ค้นหาคำอังกฤษหรือคำแปล" aria-label="ค้นหาคำของฉัน" autocomplete="off"></div>
+        <ul id="customList" class="custom-list"></ul>
+      </div>
+    </section>
+  </main>
+
+  <aside class="side">
+    <section id="rewardsPanel" class="panel rewards" aria-label="รางวัลของฉัน" hidden>
+      <div class="lvl">
+        <span id="rwEmoji" class="lvl-em" aria-hidden="true"></span>
+        <div class="lvl-txt"><small>ระดับของฉัน</small><strong id="rwLevel"></strong></div>
+        <span id="rwPoints" class="chip pts"></span>
+      </div>
+      <div class="progress"><div id="rwBar"></div></div>
+      <p id="rwNext" class="status left"></p>
+      <p id="rwBest" class="status left"></p>
+      <h2 class="rw-title">เหรียญรางวัล</h2>
+      <div id="badges" class="badges"></div>
+      <p class="hint left">แบบทดสอบ: ตอบถูกข้อละ 10 แต้ม ถูกติดกัน 3 ข้อขึ้นไปได้โบนัส +5 ต่อข้อ เต็มทุกข้อ (อย่างน้อย 5 ข้อ) ได้เพิ่ม +50<br>เกมจับคู่: คู่ละ 10 แต้ม พลิกไม่เกิน 8 ครั้งได้เพิ่ม +40 ไม่เกิน 12 ครั้งได้เพิ่ม +20</p>
+    </section>
+  </aside>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
 <script src="words.js"></script>
 <script src="ipa.js"></script>
 <script src="emoji.js"></script>
