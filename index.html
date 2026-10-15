@@ -41,7 +41,7 @@
   <nav class="tabs" aria-label="โหมด">
     <button id="modeStudy" aria-pressed="true"><svg class="ic"><use href="#i-book"/></svg><span>ท่องศัพท์</span></button>
     <button id="modeQuiz" aria-pressed="false"><svg class="ic"><use href="#i-quiz"/></svg><span>แบบทดสอบ</span></button>
-    <button id="modeGame" aria-pressed="false"><svg class="ic"><use href="#i-game"/></svg><span>เกมจับคู่</span></button>
+    <button id="modeGame" aria-pressed="false"><svg class="ic"><use href="#i-game"/></svg><span>เกม</span></button>
     <button id="modeManage" aria-pressed="false"><svg class="ic"><use href="#i-plus"/></svg><span>เพิ่มคำ</span></button>
   </nav>
 
@@ -163,15 +163,73 @@
 
     <section id="game" hidden>
       <div id="gameSetup" class="panel setup">
-        <div class="panel-head"><h2 class="panel-title">เกมจับคู่</h2></div>
+        <div class="panel-head"><h2 class="panel-title">เกม</h2></div>
+        <fieldset>
+          <legend>เลือกเกม</legend>
+          <div class="seg">
+            <label><input type="radio" name="gameType" value="match" checked><span>จับคู่</span></label>
+            <label><input type="radio" name="gameType" value="knoword"><span>Knoword</span></label>
+          </div>
+        </fieldset>
+        <fieldset id="knOptions" hidden>
+          <legend>ประเภทคำใบ้</legend>
+          <div class="seg">
+            <label><input type="radio" name="knClue" value="mix" checked><span>ผสม</span></label>
+            <label><input type="radio" name="knClue" value="th"><span>คำแปลไทย</span></label>
+            <label><input type="radio" name="knClue" value="cloze"><span>ประโยค</span></label>
+          </div>
+        </fieldset>
         <p id="gameInfo" class="status left"></p>
-        <p class="hint left">จับคู่คำอังกฤษกับคำแปลไทยให้ครบ 6 คู่ ยิ่งพลิกน้อยยิ่งได้แต้มมาก</p>
+        <p id="gameDesc" class="hint left"></p>
         <button id="gameStart" class="primary big block">เริ่มเล่น</button>
       </div>
 
       <div id="gamePlay" class="quiz-box" hidden>
         <p id="gameStatus" class="status"></p>
         <div id="board" class="board"></div>
+      </div>
+
+
+      <div id="knPlay" class="quiz-box" hidden>
+        <div class="q-head">
+          <span id="knStatus" class="status"></span>
+          <span id="knFloat" class="pts-float" aria-hidden="true"></span>
+        </div>
+        <div class="timer"><div id="knBar"></div></div>
+        <div id="knCard" class="q-prompt paper kn-card">
+          <span class="tag" id="knTag"></span>
+          <span id="knClue" class="kn-clue"></span>
+          <p id="knSentence" class="kn-sentence"></p>
+          <div id="knBlanks" class="blanks" aria-label="จำนวนตัวอักษร"></div>
+        </div>
+        <form id="knForm" class="kn-form" autocomplete="off">
+          <input id="knInput" type="text" inputmode="text" enterkeyhint="send" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="พิมพ์คำศัพท์ภาษาอังกฤษ" aria-label="คำตอบ">
+          <button id="knSubmit" class="primary">ส่ง</button>
+        </form>
+        <p id="knMsg" class="feedback" aria-live="polite"></p>
+        <div class="kn-actions">
+          <button type="button" id="knHint" class="ghost">ใบ้ตัวอักษร</button>
+          <button type="button" id="knSkip" class="ghost">ข้าม</button>
+        </div>
+      </div>
+
+      <div id="knResult" class="panel result" hidden>
+        <p class="res-title">หมดเวลา</p>
+        <div class="stats">
+          <div class="stat"><b id="knStatSolved"></b><small>คำที่ตอบได้</small></div>
+          <div class="stat"><b id="knStatPts"></b><small>แต้มที่ได้</small></div>
+          <div class="stat"><b id="knStatAcc"></b><small>ถูกตั้งแต่ครั้งแรก</small></div>
+        </div>
+        <p id="knResMsg" class="res-msg"></p>
+        <ul id="knResBadges" class="res-badges"></ul>
+        <div id="knMissBox" class="wrong-box" hidden>
+          <h3>คำที่ข้ามหรือยังไม่ได้ตอบ</h3>
+          <ul id="knMiss" class="wrong-list"></ul>
+        </div>
+        <div class="controls">
+          <button id="knBack" class="ghost">กลับ</button>
+          <button id="knAgain" class="primary">เล่นอีกครั้ง</button>
+        </div>
       </div>
 
       <div id="gameResult" class="panel result" hidden>

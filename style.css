@@ -289,6 +289,29 @@ kbd{background:var(--bg2);padding:1px 6px;border-radius:5px;font-family:inherit;
 @keyframes toastIn{from{opacity:0;transform:translateY(10px)}}
 
 /* desktop: nav rail | main | rewards */
+/* knoword */
+.timer{height:10px;background:var(--bg2);border-radius:99px;overflow:hidden}
+#knBar{height:100%;width:100%;border-radius:99px;background:var(--good);transition:width .25s linear,background-color .3s}
+#knBar.low{background:var(--bad)}
+.kn-card{padding:56px 16px 22px;gap:10px}
+.kn-clue{font-size:clamp(1.5rem,6.8vw,2rem);font-weight:700;line-height:1.3;color:var(--accent);overflow-wrap:anywhere}
+.kn-sentence{margin:0;font-family:var(--font-ipa);font-size:1rem;line-height:1.6;overflow-wrap:anywhere}
+.kn-sentence:empty{display:none}
+.kn-sentence .gap{display:inline-block;min-width:3.2em;border-bottom:2px solid var(--accent);margin:0 2px;vertical-align:baseline}
+.kn-sentence small{display:block;margin-top:6px;color:var(--muted);font-family:var(--font-ui);font-size:.88rem}
+.blanks{display:flex;flex-wrap:wrap;justify-content:center;gap:5px 4px;margin-top:6px}
+.blank{width:1.55rem;height:2rem;display:grid;place-items:center;border-bottom:3px solid var(--fg);font:700 1.25rem/1 var(--font-word);text-transform:lowercase}
+.blank.gap{border-bottom-color:transparent;width:.9rem}
+.blank.shown{color:var(--accent);border-bottom-color:var(--accent)}
+.blank.fixed{border-bottom-color:transparent;width:1rem}
+.kn-form{display:flex;gap:8px}
+.kn-form input{flex:1;font-size:1.1rem}
+.kn-form .primary{padding-inline:20px}
+.kn-form.shake{animation:shake .4s ease}
+.kn-form.ok input{border-color:var(--good);background:var(--good-bg)}
+.kn-actions{display:flex;gap:10px;justify-content:center}
+.kn-actions button{flex:1}
+#knMsg{min-height:1.5em}
 @media (min-width:960px){
   body{padding-block:28px 40px}
   .app{max-width:1240px;display:grid;grid-template-columns:210px minmax(0,1fr) 320px;grid-template-areas:"top top top" "nav main side";gap:24px 32px;align-items:start}

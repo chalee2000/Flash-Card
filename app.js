@@ -128,7 +128,7 @@ document.addEventListener("keydown", e => {
 
 // ---------- ระบบรางวัล ----------
 const KEY_REWARD = "flashcard.rewards";
-const R = Object.assign({ points: 0, quizzes: 0, correct: 0, perfect: 0, bestStreak: 0, bestPct: 0, games: 0, flawless: 0, dirs: {}, badges: [] }, load(KEY_REWARD, {}));
+const R = Object.assign({ points: 0, quizzes: 0, correct: 0, perfect: 0, bestStreak: 0, bestPct: 0, games: 0, flawless: 0, knRounds: 0, knBest: 0, dirs: {}, badges: [] }, load(KEY_REWARD, {}));
 const saveR = () => { save(KEY_REWARD, R); renderHeader(); if (!$("rewardsPanel").hidden) renderRewards(); };
 const MIN_COUNTED = 5; // ต้องทำอย่างน้อย 5 ข้อจึงนับเป็นรอบทดสอบ
 const LEVELS = [[0, "มือใหม่", "🌱"], [100, "นักเรียน", "📘"], [200, "นักอ่าน", "📖"], [300, "นักท่องศัพท์", "🧭"], [500, "นักสำรวจ", "🔍"], [700, "ผู้ชำนาญ", "🎓"], [1000, "ผู้เชี่ยวชาญ", "🏅"], [1500, "ปรมาจารย์", "👑"], [2200, "อัจฉริยะ", "🧠"], [3000, "ตำนาน", "🌟"], [5000, "เทพศัพท์", "🔱"]];
@@ -143,6 +143,8 @@ const BADGES = [
   ["pts1000", "🥇", "1,000 แต้ม", "สะสมครบ 1,000 แต้ม", r => r.points >= 1000],
   ["quizzes10", "📚", "ขยัน", "ทำแบบทดสอบครบ 10 รอบ", r => r.quizzes >= 10],
   ["game1", "🧩", "เล่นเกมจับคู่", "เล่นเกมจับคู่จนจบ 1 รอบ", r => r.games >= 1],
+  ["kn1", "✍️", "นักพิมพ์", "เล่น Knoword จนหมดเวลาและตอบได้อย่างน้อย 1 คำ", r => r.knRounds >= 1],
+  ["kn10", "⌨️", "พิมพ์ไว", "ตอบ Knoword ได้ 10 คำในรอบเดียว", r => r.knBest >= 10],
   ["flawless", "🎴", "จับคู่ไม่พลาด", "จับคู่ครบโดยพลิกแค่ 6 ครั้ง", r => r.flawless >= 1],
   ["correct100", "💯", "ถูกสะสม 100 ข้อ", "ตอบถูกสะสมครบ 100 ข้อ", r => r.correct >= 100]
 ];
@@ -221,7 +223,7 @@ const show = (id, on) => { $(id).hidden = !on; };
 
 function setMode(m) {
   mode = m;
-  clearInterval(G.timer);
+  clearInterval(G.timer); clearInterval(K.timer);
   show("study", m === "study"); show("studyTools", m === "study"); show("quiz", m === "quiz"); show("game", m === "game"); show("manage", m === "manage"); show("mainToolbar", m !== "manage");
   setRewards(false);
   $("modeStudy").setAttribute("aria-pressed", m === "study");
@@ -361,11 +363,24 @@ const pickPairs = () => {
 };
 const fmtTime = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
+const gameType = () => radioVal("gameType") || "match";
+const knPool = () => catPool().filter(w => w[0].length <= 20);
+
 function gameSetup() {
-  clearInterval(G.timer);
-  show("gameSetup", true); show("gamePlay", false); show("gameResult", false);
-  const ok = pickPairs().length === 6;
-  $("gameInfo").textContent = ok ? "เลือกหมวดจากเมนูด้านบน แล้วกดเริ่มเล่น" : "หมวดนี้มีคำไม่พอ ต้องมีอย่างน้อย 6 คำที่ความหมายไม่ซ้ำกัน";
+  clearInterval(G.timer); clearInterval(K.timer);
+  show("gameSetup", true); show("gamePlay", false); show("gameResult", false); show("knPlay", false); show("knResult", false);
+  const kn = gameType() === "knoword";
+  show("knOptions", kn);
+  let ok;
+  if (kn) {
+    ok = knPool().length >= 5;
+    $("gameInfo").textContent = ok ? "เลือกหมวดจากเมนูด้านบน แล้วกดเริ่มเล่น" : "หมวดนี้มีคำไม่พอ ต้องมีอย่างน้อย 5 คำ";
+    $("gameDesc").textContent = "ดูคำใบ้แล้วพิมพ์คำศัพท์ให้ถูก ตอบให้ได้มากที่สุดใน 60 วินาที ตอบถูกครั้งแรกโดยไม่ใช้ใบ้ได้ 10 แต้ม";
+  } else {
+    ok = pickPairs().length === 6;
+    $("gameInfo").textContent = ok ? "เลือกหมวดจากเมนูด้านบน แล้วกดเริ่มเล่น" : "หมวดนี้มีคำไม่พอ ต้องมีอย่างน้อย 6 คำที่ความหมายไม่ซ้ำกัน";
+    $("gameDesc").textContent = "จับคู่คำอังกฤษกับคำแปลไทยให้ครบ 6 คู่ ยิ่งพลิกน้อยยิ่งได้แต้มมาก";
+  }
   $("gameStart").disabled = !ok;
   setRewards(true);
 }
@@ -432,8 +447,145 @@ function finishGame() {
 }
 
 $("modeGame").onclick = () => setMode("game");
-$("gameStart").onclick = startGame;
+$("gameStart").onclick = () => (gameType() === "knoword" ? startKnoword() : startGame());
 $("gameAgain").onclick = gameSetup;
+document.querySelectorAll('input[name="gameType"]').forEach(r => { r.onchange = gameSetup; });
+
+// ---------- Knoword ----------
+const KN_TIME = 60;
+const K = { pool: [], i: 0, cur: null, tries: 0, hints: 0, shown: 0, solved: 0, first: 0, pts: 0, streak: 0, best: 0, missed: [], t0: 0, timer: null, over: true, locked: false, lvl0: 0, clue: "mix" };
+const normAns = s => s.toLowerCase().replace(/[-\s]+/g, " ").trim();
+const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+function startKnoword() {
+  const pool = shuffled(knPool());
+  if (pool.length < 5) return;
+  Object.assign(K, { pool, i: -1, solved: 0, first: 0, pts: 0, streak: 0, best: 0, missed: [], t0: Date.now(), over: false, locked: false, lvl0: levelOf(R.points), clue: radioVal("knClue") || "mix" });
+  show("gameSetup", false); show("knResult", false); setRewards(false); show("knPlay", true);
+  clearInterval(K.timer); K.timer = setInterval(knTick, 200);
+  nextWord(); knTick();
+}
+
+function knTick() {
+  const left = Math.max(0, KN_TIME - (Date.now() - K.t0) / 1000);
+  $("knBar").style.width = (left / KN_TIME * 100) + "%";
+  $("knBar").classList.toggle("low", left <= 10);
+  $("knStatus").textContent = `⏱ ${Math.ceil(left)} วินาที · ตอบได้ ${K.solved} คำ · ⭐ ${K.pts}`;
+  if (left <= 0 && !K.over) finishKnoword();
+}
+
+function nextWord() {
+  K.i++;
+  if (K.i >= K.pool.length) { K.pool = shuffled(K.pool); K.i = 0; } // วนซ้ำถ้าคำหมดก่อนหมดเวลา
+  const w = K.cur = K.pool[K.i];
+  K.tries = 0; K.hints = 0; K.shown = 0; K.locked = false;
+  const gapRe = new RegExp("\\b" + esc(w[0]) + "\\b", "i");
+  const canCloze = !!(w[2] && gapRe.test(w[2]));
+  const useCloze = K.clue === "cloze" ? canCloze : K.clue === "mix" ? canCloze && Math.random() < 0.5 : false;
+  $("knTag").textContent = useCloze ? "เติมคำในประโยค" : "คำแปลภาษาไทย";
+  const sent = $("knSentence");
+  sent.replaceChildren();
+  if (useCloze) {
+    const m = gapRe.exec(w[2]), before = w[2].slice(0, m.index), after = w[2].slice(m.index + m[0].length);
+    const gap = document.createElement("span"); gap.className = "gap"; gap.setAttribute("aria-label", "ช่องว่าง");
+    const th = document.createElement("small"); th.textContent = w[1];
+    sent.append(document.createTextNode(before), gap, document.createTextNode(after || ""), th);
+    $("knClue").textContent = "";
+  } else $("knClue").textContent = w[1];
+  renderBlanks();
+  $("knForm").className = "kn-form"; $("knInput").value = ""; $("knInput").disabled = false;
+  $("knMsg").textContent = ""; $("knMsg").className = "feedback";
+  $("knInput").focus({ preventScroll: true });
+}
+
+function renderBlanks(reveal = false) {
+  const w = K.cur[0], box = $("knBlanks");
+  box.replaceChildren(...[...w].map((ch, i) => {
+    const s = document.createElement("span");
+    if (ch === " ") { s.className = "blank gap"; return s; }
+    if (ch === "-") { s.className = "blank fixed"; s.textContent = "-"; return s; }
+    s.className = "blank" + (reveal || i < K.shown ? " shown" : "");
+    s.textContent = reveal || i < K.shown ? ch : "";
+    return s;
+  }));
+}
+
+function knMsg(text, cls = "") { $("knMsg").textContent = text; $("knMsg").className = "feedback " + cls; }
+
+function knAnswer(e) {
+  e.preventDefault();
+  if (K.over || K.locked) return;
+  const val = $("knInput").value;
+  if (!val.trim()) return;
+  if (normAns(val) === normAns(K.cur[0])) return knCorrect();
+  K.tries++;
+  const f = $("knForm"); f.classList.remove("shake"); void f.offsetWidth; f.classList.add("shake");
+  knMsg(K.tries > 1 ? `ยังไม่ถูก ลองอีกครั้ง (ผิด ${K.tries} ครั้ง)` : "ยังไม่ถูก ลองอีกครั้ง", "no");
+  $("knInput").select();
+}
+
+function knCorrect() {
+  K.locked = true;
+  const clean = K.tries === 0 && K.hints === 0;
+  const gain = clean ? 10 : 5;
+  let bonus = 0;
+  if (clean) { K.streak++; K.first++; bonus = K.streak >= 3 ? 5 : 0; K.best = Math.max(K.best, K.streak); } else K.streak = 0;
+  K.solved++; K.pts += gain + bonus; R.points += gain + bonus; R.correct++;
+  R.bestStreak = Math.max(R.bestStreak, K.streak);
+  saveR(); floatKn(gain + bonus);
+  $("knForm").className = "kn-form ok"; $("knInput").disabled = true;
+  renderBlanks(true);
+  knMsg(`✓ ถูกต้อง +${gain}` + (bonus ? ` +${bonus} 🔥 ติดกัน ${K.streak} คำ` : "") + (phonLine(K.cur[0]) ? ` · ${phonLine(K.cur[0])}` : ""), "ok");
+  speakText(K.cur[0]);
+  setTimeout(() => { if (!K.over) nextWord(); }, 750);
+}
+
+function knSkip() {
+  if (K.over || K.locked) return;
+  K.locked = true; K.streak = 0;
+  K.missed.push(K.cur);
+  renderBlanks(true); $("knInput").disabled = true;
+  knMsg(`เฉลย: ${K.cur[0]}`, "no");
+  setTimeout(() => { if (!K.over) nextWord(); }, 1100);
+}
+
+function knHint() {
+  if (K.over || K.locked) return;
+  const w = K.cur[0];
+  while (K.shown < w.length && /[ -]/.test(w[K.shown])) K.shown++;
+  if (K.shown >= w.length) return;
+  K.shown++; K.hints++;
+  while (K.shown < w.length && /[ -]/.test(w[K.shown])) K.shown++;
+  renderBlanks();
+  knMsg("เปิดตัวอักษรให้แล้ว (ตอบถูกจะได้ 5 แต้ม)");
+  $("knInput").focus({ preventScroll: true });
+}
+
+function floatKn(n) {
+  const f = $("knFloat");
+  f.textContent = `+${n}`; f.classList.remove("go"); void f.offsetWidth; f.classList.add("go");
+}
+
+function finishKnoword() {
+  K.over = true; clearInterval(K.timer);
+  if (!K.locked && K.cur) K.missed.push(K.cur);
+  if (K.solved >= 1) { R.knRounds++; R.knBest = Math.max(R.knBest, K.solved); saveR(); }
+  show("knPlay", false); show("knResult", true);
+  $("knStatSolved").textContent = K.solved;
+  $("knStatPts").textContent = `+${K.pts}`;
+  $("knStatAcc").textContent = K.solved ? Math.round(K.first / K.solved * 100) + "%" : "-";
+  $("knResMsg").textContent = K.solved >= 10 ? "พิมพ์ไวมาก" : K.solved >= 5 ? "ทำได้ดี" : K.solved >= 1 ? "ลองใหม่ให้ได้มากกว่านี้" : "รอบหน้าลองใช้ปุ่มใบ้ช่วยดู";
+  $("knResBadges").replaceChildren(...listItems(rewardLines(unlockBadges(), K.lvl0)));
+  const miss = [...new Map(K.missed.map(w => [w[0], w])).values()];
+  $("knMiss").replaceChildren(...miss.map(w => { const li = document.createElement("li"); li.textContent = `${w[0]} — ${w[1]}`; return li; }));
+  show("knMissBox", miss.length > 0);
+}
+
+$("knForm").onsubmit = knAnswer;
+$("knHint").onclick = knHint;
+$("knSkip").onclick = knSkip;
+$("knAgain").onclick = startKnoword;
+$("knBack").onclick = gameSetup;
 
 // ---------- เพิ่มคำของฉัน ----------
 let editing = -1, delArmed = -1, delTimer = null;
